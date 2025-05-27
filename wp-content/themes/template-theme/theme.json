@@ -1,0 +1,18 @@
+{
+	"settings": {
+		"appearanceTools": true,
+		"layout": {
+			"contentSize": "620px",
+			"wideSize": "1000px"
+		},
+		"useRootPaddingAwareAlignments": true	
+	},
+	"templateParts": [
+		{
+			"name": "header",
+			"area": "header"
+		}
+	],
+	"version": 3,
+	"$schema": "https://schemas.wp.org/wp/6.8/theme.json"
+}

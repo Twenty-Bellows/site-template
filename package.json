@@ -1,0 +1,14 @@
+{
+  "name": "site-template",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "wp-env start",
+    "stop": "wp-env stop",
+    "wp-env": "wp-env"
+  },
+  "author": "pbking",
+  "description": "Template for a new WordPress site",
+  "devDependencies": {
+    "@wordpress/env": "^10.24.0"
+  }
+}
