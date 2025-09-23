@@ -2,13 +2,19 @@
   "name": "site-template",
   "version": "1.0.0",
   "scripts": {
+    "init-project": "node init-project.js",
     "start": "wp-env start",
     "stop": "wp-env stop",
-    "wp-env": "wp-env"
+    "wp-env": "wp-env",
+    "build": "wp-scripts build",
+    "watch": "wp-scripts start",
+    "package": "mkdir deliverables && npm run package:theme",
+    "package:theme": "cd wp-content/themes && zip -r ../../deliverables/template-theme.zip template-theme -x 'template-theme/src/*' 'template-theme/src/**/*'"
   },
   "author": "pbking",
-  "description": "Template for a new WordPress site",
+  "description": "My Awesome Site",
   "devDependencies": {
-    "@wordpress/env": "^10.24.0"
+    "@wordpress/env": "^10.24.0",
+    "@wordpress/scripts": "^30.24.0"
   }
 }

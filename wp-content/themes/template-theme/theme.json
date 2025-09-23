@@ -1,6 +1,10 @@
 {
 	"settings": {
 		"appearanceTools": true,
+		"color": {
+			"defaultGradients": false,
+			"defaultPalette": false
+		},
 		"layout": {
 			"contentSize": "620px",
 			"wideSize": "1000px"

@@ -2,7 +2,9 @@
 	"core": "WordPress/WordPress",
 	"port": 8888,
 	"testsPort": 8889,
-	"plugins": [ 
+	"plugins": [
+		"https://downloads.wordpress.org/plugin/create-block-theme.latest-stable.zip",
+		"https://downloads.wordpress.org/plugin/pattern-builder.latest-stable.zip"
 	],
 	"themes": [
 	],
