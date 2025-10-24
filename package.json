@@ -6,10 +6,13 @@
     "start": "wp-env start",
     "stop": "wp-env stop",
     "wp-env": "wp-env",
+    "create-block:plugin": "cd wp-content/plugins/template-plugin/src/blocks && npx @wordpress/create-block@latest --namespace=template-plugin --no-wp-scripts --no-plugin",
+    "create-block:theme": "cd wp-content/themes/template-theme/src/blocks && npx @wordpress/create-block@latest --namespace=template-theme --no-wp-scripts --no-plugin",
     "build": "wp-scripts build",
     "watch": "wp-scripts start",
     "package": "mkdir deliverables && npm run package:theme",
-    "package:theme": "cd wp-content/themes && zip -r ../../deliverables/template-theme.zip template-theme -x 'template-theme/src/*' 'template-theme/src/**/*'"
+    "package:theme": "cd wp-content/themes && zip -r ../../deliverables/template-theme.zip template-theme -x 'template-theme/src/*' 'template-theme/src/**/*'",
+    "package:plugin": "cd wp-content/plugins && zip -r ../../deliverables/template-plugin.zip template-plugin -x 'template-plugin/src/*' 'template-plugin/src/**/*'"
   },
   "author": "pbking",
   "description": "My Awesome Site",
