@@ -1,0 +1,4 @@
+#NOTE: There is a bug in my build pipeline that create a /blocks folder and blocks-manifest.php file in the theme.  It shouldn't be there.
+# It is harmless, but I will remove it when I can. In the meantime I'm just ignoring it from the repo
+/build/blocks/
+blocks-manifest.php
