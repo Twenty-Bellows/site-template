@@ -29,7 +29,10 @@ const pluginConfig = {
 		// Plugin blocks from src directory
 		...getWebpackEntryPoints('script', 'wp-content/plugins/template-plugin/src')(),
 
-		plugin: path.resolve(__dirname, 'wp-content/plugins/template-plugin/src/index.js')
+		plugin: [
+			path.resolve(__dirname, 'wp-content/plugins/template-plugin/src/index.js'),
+			path.resolve(__dirname, 'wp-content/plugins/template-plugin/styles/plugin.scss'),
+		]
 	},
 	output: {
 		path: path.resolve(__dirname, 'wp-content/plugins/template-plugin/build'),
