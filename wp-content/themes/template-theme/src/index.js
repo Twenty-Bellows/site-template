@@ -1,1 +1,1 @@
-// Global Site Front-End Logic goes here
+import '../styles/theme.scss';

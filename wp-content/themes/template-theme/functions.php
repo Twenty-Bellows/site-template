@@ -17,11 +17,11 @@ add_action('after_setup_theme', function () {
 add_action('wp_enqueue_scripts', function () {
 
 	// Enqueue theme JavaScript
-	$script_asset = require(get_template_directory() . '/build/theme.asset.php');
+	$script_asset = require(get_template_directory() . '/build/index.asset.php');
 
 	wp_enqueue_script(
 		'template-theme-script',
-		get_template_directory_uri() . '/build/theme.js',
+		get_template_directory_uri() . '/build/index.js',
 		$script_asset['dependencies'],
 		$script_asset['version'],
 		true
@@ -29,9 +29,9 @@ add_action('wp_enqueue_scripts', function () {
 
 	wp_enqueue_style(
 		'template-theme-style',
-		get_template_directory_uri() . '/build/theme.css',
+		get_template_directory_uri() . '/build/index.css',
 		array(),
-		filemtime(get_template_directory() . '/build/theme.css')
+		$script_asset['version'],
 	);
 
 });

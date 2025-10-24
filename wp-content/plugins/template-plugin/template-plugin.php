@@ -20,7 +20,7 @@ if (! defined('ABSPATH')) {
 add_action('wp_enqueue_scripts', function () {
 
 	// Enqueue theme JavaScript
-	$script_asset = require(get_template_directory() . '/build/plugin.asset.php');
+	$script_asset = require(plugin_dir_path(__FILE__) . 'build/plugin.asset.php');
 
 	wp_enqueue_script(
 		'template-plugin-script',
@@ -34,7 +34,22 @@ add_action('wp_enqueue_scripts', function () {
 		'template-plugin-style',
 		get_template_directory_uri() . '/build/plugin.css',
 		array(),
-		filemtime(get_template_directory() . '/build/plugin.css')
+		$script_asset['version'],
 	);
 
+});
+
+/**
+ *
+ * Register Custom Blocks
+ *
+ */
+add_action('init', function () {
+	if ( ! file_exists( __DIR__ . '/build/blocks-manifest.php' ) ) {
+		return;
+	}
+	$manifest_data = require __DIR__ . '/build/blocks-manifest.php';
+    	foreach ( array_keys( $manifest_data ) as $block_type ) {
+        	register_block_type( __DIR__ . "/build/blocks/{$block_type}" );
+    	}
 });
