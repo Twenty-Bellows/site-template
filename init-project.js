@@ -152,6 +152,7 @@ async function main() {
   // Update webpack.config.js
   console.log('\nUpdating webpack.config.js...');
   const webpackConfigPath = path.join(__dirname, 'webpack.config.js');
+  replaceInFile(webpackConfigPath, 'template-plugin', `${projectSlug}-plugin`);
   replaceInFile(webpackConfigPath, 'template-theme', `${projectSlug}-theme`);
 
   // Clean up initialization files
