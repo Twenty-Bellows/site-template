@@ -133,9 +133,33 @@ async function main() {
   // Update package.json
   console.log('\nUpdating package.json...');
   const packageJsonPath = path.join(__dirname, 'package.json');
-  replaceInFile(packageJsonPath, 'Template for a new WordPress site', projectName);
-  replaceInFile(packageJsonPath, 'template-plugin', `${projectSlug}-plugin`);
-  replaceInFile(packageJsonPath, 'template-theme', `${projectSlug}-theme`);
+  try {
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+
+    // Update core fields
+    packageJson.name = projectSlug;
+    packageJson.description = projectName;
+
+    // Update script references
+    if (packageJson.scripts) {
+      Object.keys(packageJson.scripts).forEach(key => {
+        packageJson.scripts[key] = packageJson.scripts[key]
+          .replace(/template-plugin/g, `${projectSlug}-plugin`)
+          .replace(/template-theme/g, `${projectSlug}-theme`);
+      });
+
+      // Remove init-project script
+      if (packageJson.scripts['init-project']) {
+        delete packageJson.scripts['init-project'];
+      }
+    }
+
+    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n', 'utf8');
+    console.log('  Updated package.json name, description, and script references');
+    console.log('  Removed init-project script from package.json');
+  } catch (error) {
+    console.error(`  Error updating package.json: ${error.message}`);
+  }
 
   // Update .wp-env.json
   console.log('\nUpdating .wp-env.json...');
@@ -158,18 +182,6 @@ async function main() {
   // Clean up initialization files
   console.log('\nCleaning up initialization files...');
 
-  // Remove init-project script from package.json
-  try {
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    if (packageJson.scripts && packageJson.scripts['init-project']) {
-      delete packageJson.scripts['init-project'];
-      fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n', 'utf8');
-      console.log('  Removed init-project script from package.json');
-    }
-  } catch (error) {
-    console.error(`  Error updating package.json: ${error.message}`);
-  }
-
   // Delete this init-project.js file
   const initScriptPath = path.join(__dirname, 'init-project.js');
   try {
@@ -183,7 +195,7 @@ async function main() {
   console.log('\nNext steps:');
   console.log('  1. Run "npm start" to start the WordPress environment');
   console.log('  2. Visit http://localhost:8888 to see your site');
-  console.log('  3. Run "npm run build:theme:style" to compile SCSS');
+  console.log('  3. Run "npm run build" to compile assets or "npm run watch" for development');
 }
 
 main().catch(console.error);
