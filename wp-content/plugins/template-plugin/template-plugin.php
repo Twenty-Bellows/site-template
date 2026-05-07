@@ -19,12 +19,11 @@ if (! defined('ABSPATH')) {
  */
 add_action('wp_enqueue_scripts', function () {
 
-	// Enqueue theme JavaScript
-	$script_asset = require(plugin_dir_path(__FILE__) . 'build/plugin.asset.php');
+	$script_asset = require __DIR__ . '/build/plugin.asset.php';
 
 	wp_enqueue_script(
 		'template-plugin-script',
-		get_template_directory_uri() . '/build/plugin.js',
+		plugin_dir_url(__FILE__) . 'build/plugin.js',
 		$script_asset['dependencies'],
 		$script_asset['version'],
 		true
@@ -32,7 +31,7 @@ add_action('wp_enqueue_scripts', function () {
 
 	wp_enqueue_style(
 		'template-plugin-style',
-		get_template_directory_uri() . '/build/plugin.css',
+		plugin_dir_url(__FILE__) . 'build/plugin.css',
 		array(),
 		$script_asset['version'],
 	);
@@ -51,5 +50,11 @@ add_action('init', function () {
 	$manifest_data = require __DIR__ . '/build/blocks-manifest.php';
     	foreach ( array_keys( $manifest_data ) as $block_type ) {
         	register_block_type( __DIR__ . "/build/blocks/{$block_type}" );
+
+		// Include assets for custom blocks that cannot be represented in block.json
+		// check to see if the file get_template_directory() . "/build/blocks/{$block}/hooks.php" exists, if so, require it.
+		if ( file_exists( __DIR__ . "/build/blocks/{$block_type}/hooks.php" ) ) {
+			require_once __DIR__ . "/build/blocks/{$block_type}/hooks.php";
+		}
     	}
 });

@@ -17,6 +17,7 @@
   "description": "My Awesome Site",
   "devDependencies": {
     "@wordpress/env": "^10.24.0",
-    "@wordpress/scripts": "^30.24.0"
+    "@wordpress/scripts": "^30.24.0",
+    "copy-webpack-plugin": "^14.0.0"
   }
 }
