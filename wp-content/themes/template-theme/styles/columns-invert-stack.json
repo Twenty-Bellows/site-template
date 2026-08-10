@@ -1,0 +1,8 @@
+{
+	"$schema": "https://schemas.wp.org/wp/6.8/theme.json",
+	"version": 3,
+	"title": "Invert Stack",
+	"slug": "invert-stack",
+	"blockTypes": [ "core/columns" ],
+	"styles": { "css": "--wp-placeholder: 0;" }
+}
