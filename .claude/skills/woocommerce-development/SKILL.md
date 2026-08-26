@@ -1,3 +1,8 @@
+---
+name: woocommerce-development
+description: WooCommerce customization guidance — products, checkout, orders, template overrides, HPOS compatibility. Use when building or modifying store functionality.
+---
+
 # Skill: WooCommerce Development
 
 ## Description
@@ -11,13 +16,13 @@ Expert guidance for customizing WooCommerce stores, including products, checkout
 - User wants to work with orders programmatically
 - User needs WooCommerce REST API integration
 
-## WordPress Boost Tools to Use
+## Verifying against the local environment
+This repo runs WordPress through wp-env. To inspect or test store behavior:
 ```
-- woocommerce_info: Get WooCommerce details
-- list_hooks: Find WooCommerce hooks
-- database_schema: Check WooCommerce tables
-- wp_shell: Test WooCommerce functions
-- rest_api_routes: Check WC REST endpoints
+npm start                                      # boot the environment
+npx wp-env run cli wp plugin list              # confirm WooCommerce is active
+npx wp-env run cli wp wc product list --user=admin   # WC CLI commands
+npx wp-env run cli wp shell                    # interactive PHP against the install
 ```
 
 ## Key Concepts
@@ -206,14 +211,22 @@ add_filter( 'wc_order_statuses', function( $statuses ) {
 - `woocommerce_payment_complete`
 
 ## Template Override
-Copy templates from `woocommerce/templates/` to your theme's `woocommerce/` folder.
 
-Example: `wp-content/themes/mytheme/woocommerce/single-product.php`
+**Block themes (this repo):** WooCommerce supports block-theme templates. Put HTML
+templates in the theme's `templates/` directory — `single-product.html`,
+`archive-product.html` — composed from WooCommerce blocks
+(`woocommerce/product-image-gallery`, `woocommerce/add-to-cart-form`,
+`woocommerce/product-details`, and so on). This is the preferred override path.
+
+**Classic PHP templates** (only when a block template cannot express it): copy from
+`woocommerce/templates/` to the theme's `woocommerce/` folder, e.g.
+`wp-content/themes/mytheme/woocommerce/single-product.php`. Keep the copied template's
+version comment current — WooCommerce warns when overrides fall behind.
 
 ## Checklist
 - [ ] Check WooCommerce is active before using
 - [ ] Use HPOS-compatible methods for orders
-- [ ] Override templates in theme, not plugin
+- [ ] Prefer block-theme HTML templates for overrides; classic overrides live in the theme, not the plugin
 - [ ] Test with different product types
 - [ ] Consider multisite/currency compatibility
 - [ ] Use WC form field functions in checkout

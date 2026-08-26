@@ -1,5 +1,5 @@
 ---
-name: wordpress-block-theming
+name: block-themes
 description: WordPress Full Site Editing (FSE) theme architecture. Use when generating theme.json, block templates, template parts, patterns, and functions.php for WordPress block themes.
 ---
 
@@ -10,6 +10,20 @@ Comprehensive knowledge for building WordPress block themes using Full Site Edit
 ## Absolute Rules
 
 - **NO EMOJIS**: Never use emojis anywhere in generated content - not in headings, paragraphs, button text, or any other text. This applies to all templates, patterns, and content.
+
+## Current WordPress (7.1)
+
+Written against WordPress 7.1. What that means for theme work:
+
+- **theme.json is still `"version": 3`.** Point `$schema` at the current release
+  (`https://schemas.wp.org/wp/7.1/theme.json`) rather than an old pinned one.
+- **Blocks must use Block API version 3+** (`"apiVersion": 3` in `block.json`) — the
+  editor always renders inside an iframe now, and older API versions misbehave there.
+- **Element pseudo-classes are native**: `:hover`, `:focus`, and `:active` work in
+  `styles.elements.link` / `styles.elements.button` in theme.json. Prefer them over CSS
+  for link and button states.
+- **Declare currency in `style.css`**: `Requires at least: 6.6`, `Tested up to: 7.1`,
+  `Requires PHP: 8.0` are sane 2026 values for a new theme.
 
 ## Theme Architecture
 
@@ -44,7 +58,7 @@ The `theme.json` file is the central configuration for block themes. It defines:
 
 ```json
 {
-  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "$schema": "https://schemas.wp.org/wp/7.1/theme.json",
   "version": 3
 }
 ```
@@ -146,13 +160,51 @@ Patterns are PHP files that register reusable block content.
 <!-- /wp:group -->
 ```
 
+## Fonts: self-hosted, declared in theme.json
+
+**Never enqueue a font CDN** (Google Fonts, Adobe Fonts, Bunny) at runtime — it adds a
+third-party request, a privacy exposure, and a point of failure. Download the font files
+(woff2), ship them in the theme at `assets/fonts/<family>/`, and declare them with
+`fontFace` so WordPress loads them on the front end and in the editor with no PHP at all:
+
+```json
+{
+  "settings": {
+    "typography": {
+      "fontFamilies": [
+        {
+          "name": "Fraunces",
+          "slug": "display",
+          "fontFamily": "Fraunces, Georgia, serif",
+          "fontFace": [
+            {
+              "fontFamily": "Fraunces",
+              "fontStyle": "normal",
+              "fontWeight": "400 700",
+              "src": [ "file:./assets/fonts/fraunces/fraunces-variable.woff2" ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+Prefer variable fonts (one file, a weight range in `fontWeight`) and keep the fallback
+stack real. Fonts chosen from an open catalog get downloaded once and vendored; licensed
+fonts come from the client and ship the same way.
+
 ## functions.php
 
 Keep functions.php minimal. Primary uses:
 
-### Google Fonts Enqueuing
+### Asset Enqueuing
 
-**IMPORTANT:** Always use `enqueue_block_assets` hook (not `wp_enqueue_scripts`) to ensure fonts load in BOTH the front-end AND block editor.
+Styles the editor should also see (block styles, animation classes) belong on the
+`enqueue_block_assets` hook — it loads assets on the front end AND inside the editor
+iframe. Front-end behavior scripts stay on `wp_enqueue_scripts` (they should not run in
+the editor) and load deferred:
 
 ```php
 <?php
@@ -160,32 +212,37 @@ Keep functions.php minimal. Primary uses:
  * Theme functions and definitions
  */
 
-// Enqueue Google Fonts and theme stylesheet for both front-end and block editor
-function theme_slug_enqueue_assets() {
-    wp_enqueue_style(
-        'theme-slug-fonts',
-        'https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap',
-        array(),
-        null
-    );
-
+// Stylesheet for both front-end and editor
+add_action( 'enqueue_block_assets', function () {
     wp_enqueue_style(
         'theme-slug-style',
         get_stylesheet_uri(),
-        array( 'theme-slug-fonts' ),
+        array(),
         wp_get_theme()->get( 'Version' )
     );
-}
-add_action( 'enqueue_block_assets', 'theme_slug_enqueue_assets' );
+} );
+
+// Front-end behavior only, deferred (WP 6.3+ script strategy)
+add_action( 'wp_enqueue_scripts', function () {
+    wp_enqueue_script(
+        'theme-slug-script',
+        get_template_directory_uri() . '/build/index.js',
+        array(),
+        wp_get_theme()->get( 'Version' ),
+        array(
+            'in_footer' => true,
+            'strategy'  => 'defer',
+        )
+    );
+} );
 
 // Register block patterns
-function theme_slug_register_patterns() {
+add_action( 'init', function () {
     register_block_pattern_category(
         'theme-slug',
         array( 'label' => __( 'Theme Patterns', 'theme-slug' ) )
     );
-}
-add_action( 'init', 'theme_slug_register_patterns' );
+} );
 ```
 
 ## Security in Generated Code
@@ -199,8 +256,16 @@ add_action( 'init', 'theme_slug_register_patterns' );
 
 ## style.css
 
-The style.css file contains theme metadata and custom CSS.
-** Important ** Always bring across custom CSS from the design into style.css that is not achievable via theme.json, especially for layout and composition techniques that are critical to the design's aesthetics such as animation/motion.
+The style.css file contains theme metadata, and WordPress auto-enqueues it on the front
+end and in the editor — which makes it the right home for small baseline CSS every theme
+needs (the `prefers-reduced-motion` block, the footer margin reset).
+
+**Where the rest of the CSS goes depends on the project.** In a repo with a build
+pipeline (this one: `scss/` compiled to `build/index.css` by `npm run build`), custom CSS
+that theme.json cannot express — animation, composition techniques critical to the
+design — belongs in the SCSS, not style.css. In a standalone theme with no build, bring
+that CSS across into style.css instead. Either way it must ship: a design direction that
+lives only in a comp is not implemented.
 
 ```css
 /*
@@ -210,9 +275,9 @@ Author: Author Name
 Author URI: https://example.com
 Description: A beautiful WordPress block theme
 Version: 1.0.0
-Requires at least: 6.0
-Tested up to: 6.7
-Requires PHP: 7.4
+Requires at least: 6.6
+Tested up to: 7.1
+Requires PHP: 8.0
 License: GNU General Public License v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: theme-slug
@@ -250,9 +315,11 @@ This works on any block — groups, columns, headings, paragraphs, buttons, imag
 <!-- /wp:columns -->
 ```
 
-### Animation Classes in style.css
+### Animation Classes in the theme stylesheet
 
-Generate and adapt these classes (these are examples only, do not limit yourself to these) in each theme's `style.css`:
+Generate and adapt these classes (these are examples only, do not limit yourself to
+these) in the theme's stylesheet — the `scss/` build in a repo that has one, `style.css`
+otherwise:
 
 **Entrance animations:**
 ```css
@@ -329,9 +396,13 @@ Generate and adapt these classes (these are examples only, do not limit yourself
 }
 ```
 
-### Scroll-Triggered Reveals via functions.php
+### Scroll-Triggered Reveals
 
-The most impactful animation pattern — sections revealing as the user scrolls — requires a small IntersectionObserver script. Add this to `functions.php`:
+The most impactful animation pattern — sections revealing as the user scrolls — requires
+a small IntersectionObserver script. **In a repo with a JS build (this one), put it in the
+theme's `src/index.js`**, which compiles to the already-enqueued `build/index.js` — no
+functions.php change needed. In a standalone theme with no build, add it to
+`functions.php`:
 
 ```php
 // Enqueue scroll animation observer
@@ -381,7 +452,7 @@ function theme_slug_scroll_animations() {
 add_action( 'wp_footer', 'theme_slug_scroll_animations' );
 ```
 
-Then in `style.css`, pair with CSS that starts elements hidden and animates them when `.is-visible` is added:
+Then in the theme stylesheet, pair with CSS that starts elements hidden and animates them when `.is-visible` is added:
 
 ```css
 .animate-on-scroll {
@@ -407,7 +478,8 @@ Use `className: "animate-on-scroll"` on section-level Group blocks:
 
 ### prefers-reduced-motion (Required)
 
-Every theme MUST include this in `style.css`:
+Every theme MUST include this in `style.css` (it ships there, auto-enqueued, even in
+build-pipeline repos):
 
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -446,7 +518,7 @@ Columns (className: "equal-cards")
 
 *Images in cards: `style="height:200px;object-fit:cover;width:100%"`
 
-**Required CSS** (style.css):
+**Required CSS** (theme stylesheet):
 ```css
 .equal-cards > .wp-block-column {
   display: flex;
@@ -466,7 +538,7 @@ If present, ensure bottom-aligned CTAs unless otherwise specified:
   justify-content: center;
 }
 ```
-Always add the following CSS to reset the footer top margin:
+Always add the following CSS (in `style.css`, alongside the reduced-motion block) to reset the footer top margin:
 ```css
 .wp-site-blocks > footer {
   margin-block-start: 0;
