@@ -1,1 +1,7 @@
-// Site wide theme styles go here
+// Site wide theme styles go here.
+//
+// Block style variations register in ../styles/*.json and carry their CSS as
+// partials under styles/ — every partial must be listed here or its style
+// variation ships without any CSS.
+@use 'styles/video-rounded-corners';
+@use 'styles/columns-invert-stack';

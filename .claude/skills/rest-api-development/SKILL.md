@@ -1,3 +1,8 @@
+---
+name: rest-api-development
+description: WordPress REST API guidance — custom endpoints, extending responses, authentication, permissions. Use when creating or consuming WordPress REST API routes.
+---
+
 # Skill: WordPress REST API Development
 
 ## Description
@@ -11,12 +16,12 @@ Expert guidance for creating custom REST API endpoints, extending existing endpo
 - User wants to create a mobile app backend
 - User needs to integrate with external services
 
-## WordPress Boost Tools to Use
+## Verifying against the local environment
+This repo runs WordPress through wp-env. To inspect routes and test responses:
 ```
-- rest_api_routes: List all REST routes
-- list_hooks: Find REST API hooks
-- wp_shell: Test API responses
-- database_schema: Check data structure
+npm start                                            # boot the environment
+curl http://localhost:8888/wp-json/                  # API root — lists every route
+npx wp-env run cli wp rest                           # WP-CLI REST commands
 ```
 
 ## Key Concepts

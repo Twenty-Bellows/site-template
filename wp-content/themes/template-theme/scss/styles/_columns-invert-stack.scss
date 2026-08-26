@@ -1,0 +1,7 @@
+// Reverse the order when columns stack, so a text-then-image row can lead
+// with the image on phones. 781px is where core stacks columns.
+@media (max-width: 781px) {
+	.wp-block-columns.is-style-invert-stack:not(.is-not-stacked-on-mobile) {
+		flex-direction: column-reverse;
+	}
+}

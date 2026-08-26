@@ -1,3 +1,8 @@
+---
+name: plugin-development
+description: WordPress plugin development guidance — architecture, security, hooks, settings pages, AJAX, custom post types, shortcodes. Use when creating a plugin or adding plugin functionality.
+---
+
 # Skill: WordPress Plugin Development
 
 ## Description
@@ -11,14 +16,12 @@ Expert guidance for creating WordPress plugins with proper architecture, securit
 - User wants to add custom post types or taxonomies
 - User needs to create shortcodes or widgets
 
-## WordPress Boost Tools to Use
+## Verifying against the local environment
+This repo runs WordPress through wp-env. To inspect or test live behavior:
 ```
-- list_plugins: See installed plugins
-- list_hooks: Find relevant hooks
-- list_post_types: Check existing post types
-- list_taxonomies: Check existing taxonomies
-- wp_shell: Test plugin code
-- database_schema: Check database tables
+npm start                                  # boot the environment
+npx wp-env run cli wp plugin list          # any WP-CLI command
+npx wp-env run cli wp shell                # interactive PHP against the install
 ```
 
 ## Key Concepts
@@ -48,8 +51,9 @@ my-plugin/
  * Plugin URI: https://example.com
  * Description: What the plugin does
  * Version: 1.0.0
- * Requires at least: 6.0
- * Requires PHP: 7.4
+ * Requires at least: 6.6
+ * Requires PHP: 8.0
+ * Requires Plugins: woocommerce
  * Author: Your Name
  * License: GPL v2 or later
  * Text Domain: my-plugin
@@ -57,6 +61,11 @@ my-plugin/
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 ```
+
+`Requires Plugins` (WordPress 6.5+) declares plugin dependencies by wordpress.org slug —
+WordPress blocks activation until they are installed and active. Omit the line when the
+plugin has no dependencies. Code should still guard with `class_exists()` /
+`function_exists()` and degrade usefully.
 
 ### Plugin Constants
 ```php

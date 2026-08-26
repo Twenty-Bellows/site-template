@@ -1,3 +1,8 @@
+---
+name: wp-cli-commands
+description: WP-CLI usage and custom command development — site management, database operations, bulk actions, automation scripts. Use when working with WP-CLI or automating WordPress from the command line.
+---
+
 # Skill: WP-CLI Command Development
 
 ## Description
@@ -11,12 +16,10 @@ Expert guidance for creating custom WP-CLI commands and using WP-CLI for WordPre
 - User wants to create deployment scripts
 - User needs bulk operations on posts/users
 
-## WordPress Boost Tools to Use
+## Running WP-CLI in this repo
+This repo runs WordPress through wp-env, so every command below is invoked as:
 ```
-- wp_cli: Execute WP-CLI commands
-- database_schema: Check database structure
-- list_post_types: Available post types
-- list_options: WordPress options
+npx wp-env run cli wp <command>        # e.g. npx wp-env run cli wp plugin list
 ```
 
 ## Key Concepts

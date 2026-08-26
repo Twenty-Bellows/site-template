@@ -11,21 +11,17 @@ add_action('after_setup_theme', function () {
 
 /**
  *
- * Enqueue theme styles and scripts
+ * Enqueue theme styles — on enqueue_block_assets so the editor iframe gets
+ * them too, keeping block styles and animation classes visible while editing
  *
  */
-add_action('wp_enqueue_scripts', function () {
+add_action('enqueue_block_assets', function () {
 
-	// Enqueue theme JavaScript
-	$script_asset = require(get_template_directory() . '/build/index.asset.php');
-
-	wp_enqueue_script(
-		'template-theme-script',
-		get_template_directory_uri() . '/build/index.js',
-		$script_asset['dependencies'],
-		$script_asset['version'],
-		true
-	);
+	$asset_file = get_template_directory() . '/build/index.asset.php';
+	if (! file_exists($asset_file)) {
+		return;
+	}
+	$script_asset = require $asset_file;
 
 	wp_enqueue_style(
 		'template-theme-style',
@@ -37,11 +33,39 @@ add_action('wp_enqueue_scripts', function () {
 });
 
 /**
- * 
- * Allow SVG uploads
- * 
+ *
+ * Enqueue theme scripts — front end only, deferred
+ *
+ */
+add_action('wp_enqueue_scripts', function () {
+
+	$asset_file = get_template_directory() . '/build/index.asset.php';
+	if (! file_exists($asset_file)) {
+		return;
+	}
+	$script_asset = require $asset_file;
+
+	wp_enqueue_script(
+		'template-theme-script',
+		get_template_directory_uri() . '/build/index.js',
+		$script_asset['dependencies'],
+		$script_asset['version'],
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
+
+});
+
+/**
+ *
+ * Allow SVG uploads — administrators only, since SVG can carry script
+ *
  */
 add_filter('upload_mimes', function ($mimes) {
-	$mimes['svg'] = 'image/svg+xml';
+	if (current_user_can('manage_options')) {
+		$mimes['svg'] = 'image/svg+xml';
+	}
 	return $mimes;
 });

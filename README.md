@@ -12,7 +12,7 @@ A simple WordPress development template featuring a block theme and companion pl
 
 ## Requirements
 
-- Node.js (v14 or higher)
+- Node.js (v20 or higher)
 - npm or yarn
 - Docker (for wp-env)
 
@@ -59,6 +59,7 @@ A simple WordPress development template featuring a block theme and companion pl
 - `npm stop` - Stop WordPress development environment
 - `npm run build` - Build/compile SCSS and JavaScript
 - `npm run watch` - Watch files and auto-compile on changes
+- `npm run validate:blocks` - Validate all pattern/template/part block markup with the editor's own validator
 - `npm run package` - Create distributable theme zip file
 - `npm run wp-env` - Run wp-env commands directly
 
