@@ -18,6 +18,10 @@ This is a WordPress block theme and plugin development template using `@wordpres
 - `npm run wp-env <command>` - Run any wp-env command
 - `npm run build` - Build/compile SCSS and JavaScript
 - `npm run watch` - Watch and auto-compile SCSS and JavaScript on changes
+- `npm run validate:blocks` - Check every pattern, template, and part with the block
+  editor's own validator (no Docker or browser needed). Invalid hand-authored block markup
+  renders fine on the front end but shows "Block contains unexpected or invalid content"
+  in the editor, so run this before committing markup changes
 - `npm run package` - Create a distributable theme zip file
 
 ### WordPress Admin Access
@@ -29,18 +33,28 @@ This is a WordPress block theme and plugin development template using `@wordpres
 
 ### Theme Structure (wp-content/themes/template-theme/)
 - **Block Theme**: Uses Full Site Editing with templates and patterns
-- **templates/**: Full page templates (index.html, singular.html)
-- **parts/**: Reusable template parts (header.html)
-- **patterns/**: Block patterns for content layouts
-- **src/**: Source files (JavaScript and SCSS)
-- **styles/**: SCSS source files for custom styling
+- **templates/**: Full page templates (index.html, front-page.html)
+- **parts/**: Template parts — each is a one-line shell referencing a pattern
+  (`<!-- wp:pattern {"slug":"template-theme/header"} /-->`) so the real markup lives in
+  patterns/, where pattern-syncing tools can write edits back to files
+- **patterns/**: Block patterns for content layouts, including header.php and footer.php
+  (the markup behind the shells, registered with `Inserter: no`)
+- **src/**: Source files (JavaScript and SCSS entry)
+- **scss/**: SCSS source compiled to build/ — including one partial per block style
+  variation under scss/styles/, each imported from scss/theme.scss
+- **styles/**: Block style variation registrations (`*.json` with `blockTypes`); their CSS
+  lives in the matching scss/styles/ partial
 - **build/**: Compiled CSS and JavaScript output
 - **theme.json**: Global styles and settings configuration
 - **functions.php**: Theme initialization and core pattern removal
-- **style.css**: Theme metadata and information
+- **style.css**: Theme metadata, plus the baseline CSS every site ships (the
+  `prefers-reduced-motion` block and the footer margin reset) — WordPress auto-enqueues it
+  on the front end and in the editor
 
 ### Plugin Structure (wp-content/plugins/template-plugin/)
 - **template-plugin.php**: Main plugin file for site-specific customizations
+- **imports/**: Site functionality — forms, custom post types, integrations — one file per
+  concern, auto-loaded in alphabetical order
 - Intended for functionality that should persist regardless of theme changes
 
 ### Development Configuration
@@ -68,10 +82,12 @@ All file references are automatically updated to match.
 - **Font Sizes**: Define **5 or fewer** custom font sizes for optimal editor UI (displays as buttons S/M/L/XL). More than 5 triggers a dropdown.
 - **Fluid Typography**: Use fluid font sizes with `clamp()` for responsive scaling. WordPress default minimum is 14px.
 - **Font Size Naming**: Use semantic slugs (e.g., `small`, `base`, `medium`, `large`, `x-large`) rather than specific size names.
-- Example fluid font size:
+- Example fluid font size — `size` is the plain fallback, and WordPress derives the
+  `clamp()` from `fluid.min`/`fluid.max` (never write the clamp yourself); sizes that
+  should not scale declare `"fluid": false`:
   ```json
   {
-    "size": "clamp(1rem, 0.9rem + 0.5vw, 1.25rem)",
+    "size": "1.25rem",
     "fluid": {
       "min": "1rem",
       "max": "1.25rem"
@@ -90,8 +106,12 @@ All file references are automatically updated to match.
 - **Naming Convention**: Use clear, semantic names (e.g., `primary`, `primary-dark`, `surface`, `text`).
 
 #### Custom Block Styles
-- **Register in PHP**: Use `register_block_style()` in [functions.php](wp-content/themes/template-theme/functions.php) or plugin.
-- **Style with CSS**: Keep styling in SCSS files, not inline in registration.
+- **Register as JSON**: Add a file under the theme's `styles/` directory with `slug`,
+  `title`, and `blockTypes` (see [styles/video-rounded-corners.json](wp-content/themes/template-theme/styles/video-rounded-corners.json)).
+  `register_block_style()` in PHP remains available for plugin-registered styles.
+- **Style with CSS**: Keep the styling in a matching `scss/styles/_<slug>.scss` partial,
+  imported from `scss/theme.scss` — a style variation whose partial is not imported ships
+  with no CSS at all.
 - **Naming**: Use kebab-case slugs that describe the visual treatment (e.g., `rounded-corners`, `bordered`, `highlight`).
 
 ### PHP Coding Standards
@@ -124,9 +144,11 @@ All file references are automatically updated to match.
 ### Block Development
 
 #### Block Patterns
-- **Location**: Store patterns as HTML files in [/patterns/](wp-content/themes/template-theme/patterns/) directory.
+- **Location**: Store patterns as PHP files in [/patterns/](wp-content/themes/template-theme/patterns/) directory.
 - **Naming**: Use descriptive, kebab-case filenames (e.g., `hero-with-cta.php`, `testimonial-grid.php`).
-- **Front Matter**: Include pattern metadata (title, description, categories) in PHP comment blocks.
+- **Front Matter**: Include pattern metadata (title, description, categories) in PHP comment blocks; internal-only patterns (header, footer) add `Inserter: no`.
+- **Internal links**: Build them with `home_url()` (`href="<?php echo esc_url( home_url( '/about/' ) ); ?>"`), never a hardcoded root-absolute path — `href="/about/"` breaks on any subdirectory install, and `npm run validate:blocks` flags it.
+- **Validate**: Run `npm run validate:blocks` after editing pattern, template, or part markup.
 
 #### Custom Blocks
 - **Creation**: Use `npm run create-block` script to scaffold new blocks in the plugin.

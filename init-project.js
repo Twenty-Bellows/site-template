@@ -48,12 +48,21 @@ function replaceInFile(filePath, searchValue, replaceValue) {
   }
 }
 
+// Read a --flag value from argv (returns null when absent)
+function argValue(flag) {
+  const args = process.argv.slice(2);
+  const index = args.indexOf(flag);
+  return index !== -1 && args[index + 1] ? args[index + 1] : null;
+}
+
 async function main() {
   console.log('WordPress Site Template Initialization\n');
 
-  // Get project name and slug from user
-  const projectName = await prompt('Enter project name (e.g., "My Awesome Site"): ');
-  const projectSlug = await prompt('Enter project slug (e.g., "my-awesome-site"): ');
+  // Non-interactive when flags are supplied:
+  //   node init-project.js --name "My Awesome Site" --slug my-awesome-site
+  // Falls back to interactive prompts for any missing value.
+  const projectName = argValue('--name') || await prompt('Enter project name (e.g., "My Awesome Site"): ');
+  const projectSlug = argValue('--slug') || await prompt('Enter project slug (e.g., "my-awesome-site"): ');
 
   if (!projectName || !projectSlug) {
     console.error('Both name and slug are required!');
@@ -89,6 +98,16 @@ async function main() {
         replaceInFile(filePath, 'template-theme', `${projectSlug}-theme`);
       }
     });
+  });
+
+  // Update folder-path references in root docs (paths only — prose is left alone)
+  console.log('\nUpdating root docs...');
+  ['CLAUDE.md', 'README.md'].forEach(file => {
+    const filePath = path.join(__dirname, file);
+    if (fs.existsSync(filePath)) {
+      replaceInFile(filePath, 'template-plugin', `${projectSlug}-plugin`);
+      replaceInFile(filePath, 'template-theme', `${projectSlug}-theme`);
+    }
   });
 
   // Rename plugin folder and file

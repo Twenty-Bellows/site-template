@@ -1,5 +1,5 @@
 {
-	"$schema": "https://schemas.wp.org/wp/6.9/theme.json",
+	"$schema": "https://schemas.wp.org/wp/7.1/theme.json",
 	"version": 3,
 	"settings": {
 		"appearanceTools": true,
@@ -49,8 +49,8 @@
 				},
 				{
 					"color": "#d4d4d4",
-					"name": "Border",
-					"slug": "border"
+					"name": "Hairline",
+					"slug": "hairline"
 				}
 			]
 		},
@@ -118,19 +118,13 @@
 			],
 			"fontSizes": [
 				{
-					"fluid": {
-						"max": "0.875rem",
-						"min": "0.875rem"
-					},
+					"fluid": false,
 					"name": "Small",
 					"size": "0.875rem",
 					"slug": "small"
 				},
 				{
-					"fluid": {
-						"max": "1rem",
-						"min": "1rem"
-					},
+					"fluid": false,
 					"name": "Base",
 					"size": "1rem",
 					"slug": "base"
@@ -141,7 +135,7 @@
 						"min": "1.125rem"
 					},
 					"name": "Medium",
-					"size": "clamp(1.125rem, 1rem + 0.625vw, 1.25rem)",
+					"size": "1.25rem",
 					"slug": "medium"
 				},
 				{
@@ -150,7 +144,7 @@
 						"min": "1.5rem"
 					},
 					"name": "Large",
-					"size": "clamp(1.5rem, 1.25rem + 1.25vw, 2rem)",
+					"size": "2rem",
 					"slug": "large"
 				},
 				{
@@ -159,7 +153,7 @@
 						"min": "2rem"
 					},
 					"name": "Extra Large",
-					"size": "clamp(2rem, 1.5rem + 2.5vw, 3rem)",
+					"size": "3rem",
 					"slug": "x-large"
 				}
 			]
@@ -170,7 +164,7 @@
 		"blocks": {
 			"core/separator": {
 				"color": {
-					"background": "var(--wp--preset--color--border)"
+					"background": "var(--wp--preset--color--hairline)"
 				}
 			},
 			"core/site-title": {
