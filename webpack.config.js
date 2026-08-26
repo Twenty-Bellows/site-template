@@ -22,12 +22,6 @@ process.env.WP_SOURCE_PATH = './wp-content/plugins/template-plugin/src';
 
 const pluginDefaults = freshWpScriptsConfig();
 
-// With no blocks under src/blocks yet, the entry helper falls back to
-// src/index.js under the bare name "index" — the same file the explicit
-// `plugin` entry already bundles. Drop the duplicate.
-const pluginEntries = getWebpackEntryPoints('script')();
-delete pluginEntries.index;
-
 const copyPlugin = new CopyWebpackPlugin({
 	patterns: [{
 		from: 'src/blocks/**/hooks.php',
@@ -41,11 +35,20 @@ const copyPlugin = new CopyWebpackPlugin({
 	}],
 });
 
+// Plugin blocks from src directory. With no block.json anywhere under src/,
+// wp-scripts falls back to a bare `index` entry pointing at src/index.js —
+// which is already the `plugin` entry below, so it emits a duplicate set of
+// empty assets into build/ and ships them. Block entries are keyed
+// `blocks/<name>/index`, so a bare `index` key is only ever that fallback.
+// A plugin with no custom blocks is the normal case, not an edge one: most
+// builds need none, and the ones that do should have earned them.
+const pluginBlockEntries = getWebpackEntryPoints('script')();
+delete pluginBlockEntries.index;
+
 const pluginConfig = {
 	...pluginDefaults,
 	entry: {
-		// Plugin blocks from src directory
-		...pluginEntries,
+		...pluginBlockEntries,
 
 		plugin: path.resolve(__dirname, 'wp-content/plugins/template-plugin/src/index.js'),
 	},
