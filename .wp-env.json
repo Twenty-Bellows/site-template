@@ -3,14 +3,15 @@
 	"port": 8888,
 	"testsPort": 8889,
 	"plugins": [
-		"https://downloads.wordpress.org/plugin/create-block-theme.latest-stable.zip",
-		"https://downloads.wordpress.org/plugin/pattern-builder.latest-stable.zip"
+		"https://downloads.wordpress.org/plugin/create-block-theme.zip",
+		"https://downloads.wordpress.org/plugin/pattern-builder.zip"
 	],
 	"themes": [
 	],
         "mappings": { 
             "wp-content/plugins": "./wp-content/plugins",
-            "wp-content/themes": "./wp-content/themes" 
+            "wp-content/themes": "./wp-content/themes" ,
+            "wp-content/uploads": "./wp-content/uploads" 
         },
 	"lifecycleScripts": {
 		"afterStart": "wp-env run cli wp theme activate template-theme && wp-env run cli wp plugin activate template-plugin"
