@@ -5,6 +5,6 @@
 	"title": "Rounded Corners",
 	"blockTypes": ["core/video"],
 	"styles": {
-		"css": "/* see scss/styles/_video-rounded-corners.scss */"
+		"css": "border-radius: 10px; overflow: hidden;"
 	}
 }

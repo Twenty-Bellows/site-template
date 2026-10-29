@@ -17,7 +17,7 @@ project is built — see [Pattern Builder](#pattern-builder).
 - `npm run init-project` - Initialize project with custom name/slug (one-time use, self-deletes)
 
 ### Development Environment
-- `npm run server:start` - Start the WordPress development environment with Xdebug (http://localhost:8888)
+- `npm run server:start` - Start the WordPress development environment (http://localhost:8888)
 - `npm run server:stop` - Stop the WordPress development environment
 - `npm run wp-env <command>` - Run any wp-env command
 - `npm run build` - Build/compile SCSS and JavaScript
@@ -43,10 +43,11 @@ project is built — see [Pattern Builder](#pattern-builder).
   the part shells, registered with `Inserter: no`) and kitchen-sink.php (a showcase of core
   blocks and theme presets, not placed in any template)
 - **src/**: Source files (JavaScript and SCSS entry)
-- **scss/**: SCSS source compiled to build/ — including one partial per block style
-  variation under scss/styles/, each imported from scss/theme.scss
-- **styles/**: Block style variation registrations (`*.json` with `blockTypes`); their CSS
-  lives in the matching scss/styles/ partial
+- **scss/**: SCSS source compiled to build/. Holds only what a block style variation's JSON
+  cannot (an `@media` or `@keyframes` at-rule), as a partial under scss/styles/ imported
+  from scss/theme.scss
+- **styles/**: Block style variations (`*.json` with `blockTypes`) — each registers the
+  variation and carries its styles and CSS
 - **build/**: Compiled CSS and JavaScript output
 - **theme.json**: Global styles and settings configuration
 - **functions.php**: Removes core block patterns, enqueues `build/index.css` (front end and
@@ -71,7 +72,7 @@ project is built — see [Pattern Builder](#pattern-builder).
   - Maps local wp-content to container
   - Installs Pattern Builder and Create Block Theme from wordpress.org
   - Auto-activates the theme and plugin after start
-  - Sets up test environment on port 8889
+  - Test environment is disabled (`testsEnvironment: false`)
 - **webpack.config.js**: Build configuration for SCSS and JavaScript
   - Exports two builds: the theme (`src/index.js`, which imports `scss/theme.scss`, to the
     theme's `build/`) and the plugin (`src/index.js` plus any `src/blocks/*/block.json`
@@ -126,13 +127,30 @@ All file references are automatically updated to match.
 
 ### theme.json Configuration
 
+The design system follows Pattern Builder's conventions (the `design-system.md` reference in
+its `pattern-author` guide is the authority). Patterns reference tokens by slug, so a slug
+that breaks the convention renders as no styling at all.
+
+#### Colors
+- **A role, never a hue**: a slug names the job the color does. Pattern Builder's
+  `add-design-tokens` accepts only these roles: `base`, `surface`, `surface-muted`,
+  `surface-strong`, `surface-inverse`, `contrast`, `text-muted`, `text-subtle`,
+  `text-inverse`, `on-primary`, `on-secondary`, `on-accent`, `primary`, `primary-hover`,
+  `secondary`, `secondary-hover`, `tertiary`, `accent`, `accent-strong`, `accent-muted`,
+  `hairline`, `hairline-strong`, `success`, `warning`, `error`, `info`, `overlay`, `highlight`.
+- **`base` is the page, `contrast` is the text on it.**
+- **Explicit Colors Only**: Define only the colors actually used in the design.
+- Never inline a hex in a pattern or template.
+
 #### Typography
-- **Font Sizes**: Define **5 or fewer** custom font sizes for optimal editor UI (displays as buttons S/M/L/XL). More than 5 triggers a dropdown.
-- **Fluid Typography**: Use fluid font sizes with `clamp()` for responsive scaling. WordPress default minimum is 14px.
-- **Font Size Naming**: Use semantic slugs (e.g., `small`, `base`, `medium`, `large`, `x-large`) rather than specific size names.
-- Example fluid font size — `size` is the plain fallback, and WordPress derives the
-  `clamp()` from `fluid.min`/`fluid.max` (never write the clamp yourself); sizes that
-  should not scale declare `"fluid": false`:
+- **Five font sizes, exactly**: `x-small`, `small`, `medium`, `large`, `x-large`, each larger
+  than the last. No other slug (`base`, `huge`, `display`) is accepted. If a measured size falls
+  between two, use the nearer one.
+- **Heading sizes are not font sizes**: set `h1`–`h6` on `styles.elements` and let heading
+  blocks take their level's size. Text that is not a heading never borrows a heading's size.
+- **Fluid Typography**: `size` is the plain fallback and WordPress derives the `clamp()` from
+  `fluid.min`/`fluid.max` (never write the clamp yourself); sizes that should not scale declare
+  `"fluid": false`:
   ```json
   {
     "size": "1.25rem",
@@ -142,25 +160,57 @@ All file references are automatically updated to match.
     }
   }
   ```
+- **Font families**: set none on a pattern unless the design needs a specific face. Install it
+  with Pattern Builder's `add-font` (check `list-fonts` first — the collection serves fixed
+  weights, not variable axes), which writes the files and the preset together.
 
 #### Spacing
-- **Spacing Presets**: Define **7 or fewer** spacing values for optimal editor UI (displays as buttons). More than 7 triggers a dropdown.
-- **Spacing Scale**: Use a consistent scale system (e.g., 0.5rem, 1rem, 1.5rem, 2rem, 3rem, 4rem, 6rem).
-- **Avoid WordPress Defaults**: Define custom spacing that fits the project's design system.
+- **Numeric slugs** from core's scale (`20`–`80`); put the meaning in `name`
+  (`{ "slug": "40", "name": "Base", "size": "1.5rem" }`), never in the slug (`sm`, `md`).
+- **Prefer `40`–`60`** for the rhythm patterns share; define **7 or fewer** for the editor UI
+  (buttons up to 7, a dropdown beyond).
+- Use a consistent scale (e.g., 0.5rem, 1rem, 1.5rem, 2rem, 3rem, 4rem, 6rem).
 
-#### Colors
-- **Semantic Organization**: Organize colors by purpose (primary, secondary, accent, neutral, etc.) not by hue.
-- **Explicit Colors Only**: Define only the colors actually used in the design. No auto-generated variations.
-- **Naming Convention**: Use clear, semantic names (e.g., `primary`, `primary-dark`, `surface`, `text`).
+#### Layout
+- **Width comes from the layout, never from padding.** Patterns place content at *Regular*
+  (`contentSize`, a child with no `align`) or *Wide* (`align: wide`, `wideSize`). A section is a
+  Wide or Regular group padded top and bottom only; `align: full` is for a band whose
+  background must reach the window's edges, and its content is still Regular or Wide.
+- The only side spacing is the root padding (`styles.spacing.padding`) with
+  `useRootPaddingAwareAlignments`. To change the gutter, change it once there.
+- Sticky positioning (the header wrapper in `templates/index.html`) needs
+  `settings.position.sticky: true`; without it the group silently renders as an ordinary one.
+
+#### Where a Look Goes
+Put a look in the first place that can hold it:
+1. **theme.json** — the site's palette, scales, and what every heading, link and button looks like.
+2. **The block's own settings**, using those tokens (colors, spacing, one of the five sizes). On
+   WordPress 7.1+ a different value at a narrower width goes under the block's
+   `style["@tablet"]` / `style["@mobile"]`, not in a media query.
+3. **A block style variation's styles** (`styles/{slug}.json`) — a named look.
+4. **The variation's `css`** — pseudo-elements, transforms, hover states, for its own block only.
+5. **The theme stylesheet (SCSS)**, last, for what none of those can hold (`@keyframes`,
+   `@media`, `::selection`, a focus ring), scoped to a variation's `is-style-*` class or an
+   element. Say what you put there and why in the handoff.
+
+Never invent a `className` and style it from a stylesheet: the look is invisible in the editor
+and nobody can apply it. If a look needs a name, it is a variation.
 
 #### Custom Block Styles
 - **Register as JSON**: Add a file under the theme's `styles/` directory with `slug`,
   `title`, and `blockTypes` (see [styles/video-rounded-corners.json](wp-content/themes/template-theme/styles/video-rounded-corners.json)).
   `register_block_style()` in PHP remains available for plugin-registered styles.
-- **Style with CSS**: Keep the styling in a matching `scss/styles/_<slug>.scss` partial,
-  imported from `scss/theme.scss` — a style variation whose partial is not imported ships
-  with no CSS at all.
-- **Naming**: Use kebab-case slugs that describe the visual treatment (e.g., `rounded-corners`, `bordered`, `highlight`).
+- **Style in the JSON**: use `styles` properties first and `styles.css` for the rest (see
+  *Where a Look Goes*). Variation CSS is a declaration list followed by nested rules anchored on
+  `&`, with no comments, `@media`/`@keyframes`, `url()`, or `,` in a selector, and it styles one
+  block only — blocks inside the variation are styled through its `blocks` entries.
+- **At-rules go to SCSS**: when a variation needs `@media` or `@keyframes`, put them in a
+  matching `scss/styles/_<slug>.scss` partial imported from `scss/theme.scss`, scoped to
+  `.is-style-<slug>` (see [_columns-invert-stack.scss](wp-content/themes/template-theme/scss/styles/_columns-invert-stack.scss)).
+  A partial that is not imported ships with no CSS at all.
+- **Naming**: Use kebab-case slugs that describe the visual treatment (e.g., `rounded-corners`, `bordered`, `fade-up`).
+- **Motion** is a variation too: `is-style-fade-up`, `is-style-reveal-on-scroll`, etc., with the
+  keyframes in SCSS and a `prefers-reduced-motion` guard (already in `style.css`).
 
 ### PHP Coding Standards
 
@@ -196,7 +246,14 @@ All file references are automatically updated to match.
 - **Naming**: Use descriptive, kebab-case filenames (e.g., `hero-with-cta.php`, `testimonial-grid.php`).
 - **Front Matter**: Include pattern metadata (title, description, categories) in PHP comment blocks; internal-only patterns (header, footer) add `Inserter: no`.
 - **Internal links**: Build them with `home_url()` (`href="<?php echo esc_url( home_url( '/about/' ) ); ?>"`), never a hardcoded root-absolute path — `href="/about/"` breaks on any subdirectory install.
-- **Validate**: Validate pattern, template, and part markup with Pattern Builder's validator after editing.
+- **Generate, don't type**: Hand-written block markup can render perfectly and still show
+  "unexpected or invalid content" in the editor. Build markup with the block library
+  (`createBlock` + `serialize`, per the `pattern-author` guide), then validate.
+- **Validate**: Validate pattern, template, and part markup with Pattern Builder's validator
+  (`get-validator`) after editing, and read the `warnings` on every write.
+- **Factor**: Inventory what repeats before writing. A shape that occurs twice and has a domain
+  name (menu item, hours row) is an element pattern; sections reference elements, pages
+  reference sections. Card/tile patterns never carry a `constrained` layout at their root.
 
 #### Custom Blocks
 - **Creation**: Use `npm run create-block` script to scaffold new blocks in the plugin.

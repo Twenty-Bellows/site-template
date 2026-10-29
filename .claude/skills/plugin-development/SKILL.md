@@ -19,7 +19,7 @@ Expert guidance for creating WordPress plugins with proper architecture, securit
 ## Verifying against the local environment
 This repo runs WordPress through wp-env. To inspect or test live behavior:
 ```
-npm start                                  # boot the environment
+npm run server:start                               # boot the environment
 npx wp-env run cli wp plugin list          # any WP-CLI command
 npx wp-env run cli wp shell                # interactive PHP against the install
 ```

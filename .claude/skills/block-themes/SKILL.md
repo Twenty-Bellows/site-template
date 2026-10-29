@@ -5,11 +5,34 @@ description: WordPress Full Site Editing (FSE) theme architecture. Use when gene
 
 # WordPress Block Theming Skill
 
-Comprehensive knowledge for building WordPress block themes using Full Site Editing (FSE) architecture.
+Conventions for building WordPress block themes with Full Site Editing (FSE).
+
+## Working with Pattern Builder
+
+Where the Pattern Builder (PB) plugin is installed (it is, in this project), its
+`pattern-author` and `design-reproduction` guides are the authority on patterns,
+templates, template parts and design tokens. Load them (or call
+`get-authoring-guide`) before writing any of those. This skill covers the theme
+around them: file layout, `functions.php`, `style.css`, fonts, motion and
+composition. Where the two overlap, this skill states the rule in short and PB
+holds the detail; if they ever disagree, PB wins.
+
+The rules that matter most, all from PB:
+
+- **Generate markup, don't type it.** Hand-written block markup can render
+  perfectly and still show "unexpected or invalid content" in the editor. Build
+  it with the block library (`createBlock` + `serialize`), then validate it
+  (`get-validator`). Never hand-write a pattern and call it done.
+- **Tokens are roles, not hues** (colors), **five font sizes**, **numeric
+  spacing**. Details under theme.json below.
+- **Width comes from the layout, never from padding.**
+- **A look goes in the first place that can hold it.** No made-up classes.
+- **Factor before you write.** Repeated shapes become element patterns.
 
 ## Absolute Rules
 
 - **NO EMOJIS**: Never use emojis anywhere in generated content - not in headings, paragraphs, button text, or any other text. This applies to all templates, patterns, and content.
+- **NO decorative HTML comments**: Never insert section-labeling comments like `<!-- Hero Section -->` in templates, template parts, or patterns. Only WordPress block comments (`<!-- wp:block-name -->`) are allowed.
 
 ## Current WordPress (7.1)
 
@@ -22,150 +45,181 @@ Written against WordPress 7.1. What that means for theme work:
 - **Element pseudo-classes are native**: `:hover`, `:focus`, and `:active` work in
   `styles.elements.link` / `styles.elements.button` in theme.json. Prefer them over CSS
   for link and button states.
+- **Per-viewport block settings**: a block's `style` takes `@tablet` and `@mobile`
+  values (breakpoints 480px / 782px unless `settings.viewport` says otherwise). A grid
+  that drops to one column, or padding that shrinks, is a block setting, not a media query.
 - **Declare currency in `style.css`**: `Requires at least: 6.6`, `Tested up to: 7.1`,
   `Requires PHP: 8.0` are sane 2026 values for a new theme.
 
 ## Theme Architecture
 
-### Directory Structure
-
 ```
 theme-slug/
 ├── theme.json           # Central configuration file
-├── style.css            # Theme metadata + custom CSS
-├── functions.php        # Asset enqueuing, pattern registration
-├── templates/           # Block templates
-│   ├── index.html       # Main/fallback template
-│   ├── single.html      # Single post
-│   ├── page.html        # Single page
-│   ├── archive.html     # Archive listings
-│   ├── search.html      # Search results
-│   └── 404.html         # Not found
-├── parts/               # Reusable template parts
-│   ├── header.html      # Site header
-│   └── footer.html      # Site footer
-└── patterns/            # Block patterns
-    ├── hero.php
-    ├── features.php
-    └── cta.php
+├── style.css            # Theme metadata + baseline CSS
+├── functions.php        # Asset enqueuing, pattern categories
+├── templates/           # Block templates (index.html is required)
+├── parts/               # Template parts: one-line shells that place a pattern
+├── patterns/            # Block patterns (PHP files with a header comment)
+└── styles/              # Block style variations (JSON)
 ```
+
+In a repo with a build pipeline (this one) there is also `src/` and `scss/`,
+compiled to `build/`.
 
 ## theme.json Configuration
 
-The `theme.json` file is the central configuration for block themes. It defines:
-
-### Schema and Version
+The central configuration file. Define the whole design system here, once.
 
 ```json
 {
   "$schema": "https://schemas.wp.org/wp/7.1/theme.json",
-  "version": 3
-}
-```
-
-### Settings
-
-Define available options for the editor:
-
-```json
-{
+  "version": 3,
   "settings": {
     "appearanceTools": true,
-    "layout": { "contentSize": "800px", "wideSize": "1280px" },
-    "color": {
-      "palette": [ /* 5 colors: primary, secondary, accent, light, dark */ ],
-      "defaultPalette": false,
-      "defaultGradients": false
-    },
-    "typography": {
-      "fontFamilies": [ /* heading + body font families */ ],
-      "fontSizes": [ /* 5-6 step scale: small through huge */ ]
-    },
-    "spacing": {
-      "units": ["px", "em", "rem", "%", "vw", "vh"],
-      "spacingSizes": [ /* 6 steps from compact to spacious */ ]
-    }
+    "useRootPaddingAwareAlignments": true,
+    "position": { "sticky": true },
+    "layout": { "contentSize": "42rem", "wideSize": "64rem" },
+    "color": { "palette": [], "defaultPalette": false, "defaultGradients": false },
+    "typography": { "fontSizes": [], "defaultFontSizes": false },
+    "spacing": { "spacingSizes": [], "defaultSpacingSizes": false }
   }
 }
 ```
 
+### Tokens (PB's design system)
+
+- **Colors: a role, never a hue.** The slug says what the color does. PB accepts only
+  these roles: `base`, `surface`, `surface-muted`, `surface-strong`, `surface-inverse`,
+  `contrast`, `text-muted`, `text-subtle`, `text-inverse`, `on-primary`, `on-secondary`,
+  `on-accent`, `primary`, `primary-hover`, `secondary`, `secondary-hover`, `tertiary`,
+  `accent`, `accent-strong`, `accent-muted`, `hairline`, `hairline-strong`, `success`,
+  `warning`, `error`, `info`, `overlay`, `highlight`. `base` is the page and `contrast`
+  is the text on it. Define only the colors the design uses. Never inline a hex.
+- **Font sizes: five, and no others.** `x-small`, `small`, `medium`, `large`,
+  `x-large`, each larger than the last. A measured size between two takes the nearer.
+  Fluid sizes give `fluid.min`/`fluid.max` and let WordPress derive the clamp; sizes
+  that should not scale declare `"fluid": false`.
+- **Heading sizes are not font sizes.** Set `h1`–`h6` on `styles.elements`; heading
+  blocks then set no `fontSize`. Text that is not a heading never borrows a heading's size.
+- **Spacing: numeric slugs** (`20`–`80`, `40`–`60` preferred), meaning in the `name`
+  (`{ "slug": "40", "name": "Base", "size": "1.5rem" }`). Seven or fewer steps keeps the
+  editor UI as buttons.
+- **Font families: none on a pattern** unless the design needs a specific face.
+
 ### Styles
 
-Define default styles for the site and blocks:
+Define the site's defaults, which patterns inherit and must not restate:
 
 ```json
 {
   "styles": {
-    "color": { /* background + text from palette */ },
-    "typography": { /* body font family, medium size, line-height 1.5-1.65 */ },
+    "color": { "background": "base", "text": "contrast" },
+    "typography": { "fontFamily": "body", "fontSize": "small", "lineHeight": "1.5-1.65" },
+    "spacing": { "padding": { "left": "…", "right": "…" } },
     "elements": {
-      "heading": { /* heading font family, appropriate weight, line-height 1.1-1.3 */ },
-      "link": { /* accent color */ },
-      "button": { /* accent background, light text, border-radius */ }
+      "h1": {}, "h2": {}, "h3": {}, "h4": {}, "h5": {}, "h6": {},
+      "heading": { "typography": { "lineHeight": "1.1-1.3" } },
+      "link": {}, "button": {}
     }
   }
 }
 ```
-## Typography
-- Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
-- **Font size scale**: Keep sizes grounded and usable. Body: 1rem. Headings: scale modestly (h1 ≤ 2.5–3rem). Use `clamp()` for responsive display text, but cap at ~3.5rem max. Avoid "massive"/"gigantic" sizes above 4rem—they rarely improve design and often degrade it. A good 6-step scale: 0.875rem / 1rem / 1.25rem / 1.75rem / 2.25rem / clamp(2.5rem, 4vw, 3.5rem).
-- **Line height**: Body text: 1.5–1.65. Headings: 1.1–1.3. Never go below 1.0 for any text. Apply via `styles.typography.lineHeight` and `styles.elements.heading.typography.lineHeight` in theme.json.
+
+(Values shown as prose are guidance; reference presets as `var(--wp--preset--…)`.)
+Root `styles.spacing.padding` is the site's only side spacing; with
+`useRootPaddingAwareAlignments` every `alignfull` band still reaches the window's edges.
+
+### Typography choices
+
+Choose type for the brief rather than defaulting to system fonts when the design
+direction is yours to set. Body 1rem or larger, body line height 1.5–1.65, headings
+1.1–1.3, never below 1.0. When reproducing an existing design the sizes are the
+source's, not yours: map them to the five sizes and give the headings their exact
+values on `styles.elements`.
 
 ## Block Templates
 
-Templates use WordPress block markup (HTML comments with JSON attributes).
-
-### Template Structure
+Templates are plain HTML (no PHP) and stay thin: a handful of references plus the
+block that shows the content. Everything with a design lives in a pattern.
 
 ```html
-<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:group {"style":{"spacing":{"blockGap":"0"}}} -->
+<div class="wp-block-group">
+	<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
 
-<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group">
-  <!-- Content blocks here -->
-</main>
+	<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+	<main class="wp-block-group">
+		<!-- wp:post-content {"layout":{"type":"constrained"}} /-->
+	</main>
+	<!-- /wp:group -->
+
+	<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
+</div>
 <!-- /wp:group -->
-
-<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
 ```
+
+- The outer group with a zero `blockGap` keeps the site's block gap out from between
+  header, content and footer.
+- Content is a `main` group; header and footer parts take `header` / `footer` tagNames.
+- Reference a part by slug alone (no `theme` attribute).
+- A sticky header goes in its own group with `position: sticky` and needs
+  `settings.position.sticky` in theme.json.
+- Keep images in patterns, not templates. Leave `ref` off `core/navigation`.
+- Archives and search results use `core/query` with `"inherit": true`.
 
 ## Template Parts
 
-### Header Requirements
-- Constrained layout group with site-appropriate background
-- Flex row: `site-title` (level:0 — renders `<p>` not `<h1>`) + `navigation`
-- Appropriate padding using spacing presets
+A part is a one-line shell that places a pattern, so the design can use the theme's
+assets, localized text and the pattern tooling:
 
-### Footer Requirements
-- Constrained layout group, matching or complementing header style
-- Content varies by site type (copyright, social links, contact info, etc.)
-- Include footer margin reset in style.css
+```html
+<!-- wp:pattern {"slug":"theme-slug/header"} /-->
+```
+
+- Give every part its `area` (`header`, `footer`) in theme.json `templateParts`.
+- The header and footer patterns carry `Inserter: no`.
+- Header: a Wide or Regular group, `site-title` (`level: 0` so it renders `<p>`, not
+  `<h1>`) and `navigation` in a flex row, padded top and bottom only.
+- Footer: matching or complementing the header. Include the footer margin reset in
+  `style.css`.
 
 ## Block Patterns
 
-Patterns are PHP files that register reusable block content.
-
-### Pattern Registration
+Patterns are PHP files in `patterns/` with a header comment.
 
 ```php
 <?php
 /**
- * Title: Hero Section
- * Slug: theme-slug/hero
- * Categories: featured
+ * Title: FAQ Entry
+ * Slug: theme-slug/faq-entry
+ * Description: One question and its answer above a hairline, repeated to build a list.
+ * Categories: theme-slug_elements
  */
 ?>
-<!-- wp:group {"backgroundColor":"primary","textColor":"light","layout":{"type":"constrained"}} -->
-...
-<!-- /wp:group -->
 ```
 
-## Fonts: self-hosted, declared in theme.json
+- `Title` and `Slug` are required; the slug is namespaced. Write a real `Description`.
+- `Categories` must be registered (core's, or the theme's via
+  `register_block_pattern_category()`), or the pattern files under Uncategorized.
+- PHP in a pattern is limited to localization calls, `home_url()` and
+  `get_theme_file_uri()`, always inside `esc_url()` / `esc_html()` as appropriate.
+  Internal links are `href="<?php echo esc_url( home_url( '/about/' ) ); ?>"`.
+- Compose with `<!-- wp:pattern {"slug":"theme-slug/section-intro"} /-->` (self-closing)
+  rather than copying markup. Build bottom-up: elements, sections, pages.
+- Real placeholder copy, not lorem ipsum.
+- Validate every pattern; an empty report is the only acceptable result.
 
-**Never enqueue a font CDN** (Google Fonts, Adobe Fonts, Bunny) at runtime — it adds a
-third-party request, a privacy exposure, and a point of failure. Download the font files
-(woff2), ship them in the theme at `assets/fonts/<family>/`, and declare them with
-`fontFace` so WordPress loads them on the front end and in the editor with no PHP at all:
+## Fonts: declared in theme.json, installed with PB
+
+**Never enqueue a font CDN** (Google Fonts, Adobe Fonts, Bunny) at runtime: it adds a
+third-party request, a privacy exposure, and a point of failure. Use PB's `add-font`
+(check `list-fonts` first), which installs the files in the theme and writes the preset
+in one step. The collection serves fixed weights, one file per weight, not variable
+axes, so a design leaning on a variable axis will set differently; say so.
+
+If installing by hand, ship woff2 files at `assets/fonts/<family>/` and declare them
+with `fontFace` so WordPress loads them in the front end and the editor:
 
 ```json
 {
@@ -191,89 +245,67 @@ third-party request, a privacy exposure, and a point of failure. Download the fo
 }
 ```
 
-Prefer variable fonts (one file, a weight range in `fontWeight`) and keep the fallback
-stack real. Fonts chosen from an open catalog get downloaded once and vendored; licensed
-fonts come from the client and ship the same way.
+Licensed fonts come from the client and ship the same way. Keep the fallback stack real.
 
 ## functions.php
 
-Keep functions.php minimal. Primary uses:
-
-### Asset Enqueuing
-
-Styles the editor should also see (block styles, animation classes) belong on the
-`enqueue_block_assets` hook — it loads assets on the front end AND inside the editor
-iframe. Front-end behavior scripts stay on `wp_enqueue_scripts` (they should not run in
-the editor) and load deferred:
+Keep functions.php minimal. Styles the editor should also see belong on
+`enqueue_block_assets` (front end AND editor iframe). Front-end behavior scripts stay on
+`wp_enqueue_scripts` and load deferred.
 
 ```php
 <?php
-/**
- * Theme functions and definitions
- */
-
-// Stylesheet for both front-end and editor
+// Compiled stylesheet for both front end and editor
 add_action( 'enqueue_block_assets', function () {
     wp_enqueue_style(
         'theme-slug-style',
-        get_stylesheet_uri(),
+        get_template_directory_uri() . '/build/index.css',
         array(),
         wp_get_theme()->get( 'Version' )
     );
 } );
 
-// Front-end behavior only, deferred (WP 6.3+ script strategy)
+// Front-end behavior only, deferred
 add_action( 'wp_enqueue_scripts', function () {
     wp_enqueue_script(
         'theme-slug-script',
         get_template_directory_uri() . '/build/index.js',
         array(),
         wp_get_theme()->get( 'Version' ),
-        array(
-            'in_footer' => true,
-            'strategy'  => 'defer',
-        )
+        array( 'in_footer' => true, 'strategy' => 'defer' )
     );
 } );
 
-// Register block patterns
+// Pattern categories
 add_action( 'init', function () {
     register_block_pattern_category(
-        'theme-slug',
-        array( 'label' => __( 'Theme Patterns', 'theme-slug' ) )
+        'theme-slug_elements',
+        array( 'label' => __( 'Elements', 'theme-slug' ) )
     );
 } );
 ```
 
-## Security in Generated Code
+In a theme with no build step, enqueue `get_stylesheet_uri()` instead (WordPress
+already auto-enqueues `style.css`, so enqueue it only if the editor needs it too).
 
-- When `functions.php` outputs any user-derived value, use WordPress escaping functions:
-  - HTML context: `esc_html()`
-  - Attribute context: `esc_attr()`
-  - URL context: `esc_url()`
-- Never use `eval()`, `create_function()`, `shell_exec()`, `exec()`, or `system()` in generated theme code
-- Static block themes with hardcoded content (the default) do not need escaping — WordPress core blocks handle this. Escaping matters only if generating PHP that renders dynamic data.
+### Security
+
+- Escape any user-derived value `functions.php` outputs: `esc_html()` (HTML),
+  `esc_attr()` (attributes), `esc_url()` (URLs).
+- Never use `eval()`, `create_function()`, `shell_exec()`, `exec()`, or `system()`.
+- Static block themes with hardcoded content do not need escaping; core blocks handle it.
 
 ## style.css
 
-The style.css file contains theme metadata, and WordPress auto-enqueues it on the front
-end and in the editor — which makes it the right home for small baseline CSS every theme
-needs (the `prefers-reduced-motion` block, the footer margin reset).
-
-**Where the rest of the CSS goes depends on the project.** In a repo with a build
-pipeline (this one: `scss/` compiled to `build/index.css` by `npm run build`), custom CSS
-that theme.json cannot express — animation, composition techniques critical to the
-design — belongs in the SCSS, not style.css. In a standalone theme with no build, bring
-that CSS across into style.css instead. Either way it must ship: a design direction that
-lives only in a comp is not implemented.
+Theme metadata, plus the small baseline CSS every theme ships: the
+`prefers-reduced-motion` block and the footer margin reset. WordPress auto-enqueues it on
+the front end and in the editor.
 
 ```css
 /*
 Theme Name: Theme Name
-Theme URI: https://example.com
 Author: Author Name
-Author URI: https://example.com
-Description: A beautiful WordPress block theme
+Description: A block theme
 Version: 1.0.0
 Requires at least: 6.6
 Tested up to: 7.1
@@ -283,323 +315,196 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: theme-slug
 */
 
-```
-
-## Animation & Motion in Block Themes
-
-Animation brings life to block themes, but WordPress block markup requires a specific pattern to connect CSS animations to blocks.
-
-### The className Pattern
-
-Add animation classes to blocks via the `className` JSON attribute. WordPress renders this as a class on the wrapper div:
-
-```html
-<!-- wp:group {"className":"fade-up","align":"full","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull fade-up">
-  <!-- content -->
-</div>
-<!-- /wp:group -->
-```
-
-This works on any block — groups, columns, headings, paragraphs, buttons, images:
-
-```html
-<!-- wp:heading {"className":"slide-in-left"} -->
-<h2 class="wp-block-heading slide-in-left">Features</h2>
-<!-- /wp:heading -->
-
-<!-- wp:columns {"className":"stagger-children","align":"wide"} -->
-<div class="wp-block-columns alignwide stagger-children">
-  ...
-</div>
-<!-- /wp:columns -->
-```
-
-### Animation Classes in the theme stylesheet
-
-Generate and adapt these classes (these are examples only, do not limit yourself to
-these) in the theme's stylesheet — the `scss/` build in a repo that has one, `style.css`
-otherwise:
-
-**Entrance animations:**
-```css
-.fade-up {
-  opacity: 0;
-  transform: translateY(30px);
-  animation: fadeUp 0.6s ease forwards;
-}
-.fade-in {
-  opacity: 0;
-  animation: fadeIn 0.6s ease forwards;
-}
-.slide-in-left {
-  opacity: 0;
-  transform: translateX(-40px);
-  animation: slideIn 0.7s ease forwards;
-}
-.slide-in-right {
-  opacity: 0;
-  transform: translateX(40px);
-  animation: slideIn 0.7s ease forwards;
-}
-
-@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-@keyframes fadeIn { to { opacity: 1; } }
-@keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
-```
-
-**Staggered children** — delays applied via nth-child:
-```css
-.stagger-children > * {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeUp 0.5s ease forwards;
-}
-.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
-.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
-.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
-.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
-```
-
-**Interactive transitions:**
-```css
-.hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-}
-.hover-glow {
-  transition: box-shadow 0.3s ease;
-}
-.hover-glow:hover {
-  box-shadow: 0 0 20px rgba(var(--wp--preset--color--accent-rgb, 0,0,0), 0.3);
-}
-```
-
-**Continuous ambient motion:**
-```css
-.float {
-  animation: float 3s ease-in-out infinite;
-}
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-.pulse-subtle {
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-```
-
-### Scroll-Triggered Reveals
-
-The most impactful animation pattern — sections revealing as the user scrolls — requires
-a small IntersectionObserver script. **In a repo with a JS build (this one), put it in the
-theme's `src/index.js`**, which compiles to the already-enqueued `build/index.js` — no
-functions.php change needed. In a standalone theme with no build, add it to
-`functions.php`:
-
-```php
-// Enqueue scroll animation observer
-function theme_slug_scroll_animations() {
-    wp_add_inline_script( 'theme-slug-style', "
-        document.addEventListener('DOMContentLoaded', function() {
-            var els = document.querySelectorAll('.animate-on-scroll');
-            if (!els.length) return;
-            var observer = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.15 });
-            els.forEach(function(el) { observer.observe(el); });
-        });
-    " );
-}
-add_action( 'enqueue_block_assets', 'theme_slug_scroll_animations' );
-```
-
-**Note:** `wp_add_inline_script` requires an existing registered script handle. Since block themes may not always have a script registered, a more reliable approach is to output the script directly:
-
-```php
-// Scroll animation observer — outputs inline script
-function theme_slug_scroll_animations() {
-    ?>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var els = document.querySelectorAll('.animate-on-scroll');
-        if (!els.length) return;
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.15 });
-        els.forEach(function(el) { observer.observe(el); });
-    });
-    </script>
-    <?php
-}
-add_action( 'wp_footer', 'theme_slug_scroll_animations' );
-```
-
-Then in the theme stylesheet, pair with CSS that starts elements hidden and animates them when `.is-visible` is added:
-
-```css
-.animate-on-scroll {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.animate-on-scroll.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-```
-
-Use `className: "animate-on-scroll"` on section-level Group blocks:
-
-```html
-<!-- wp:group {"className":"animate-on-scroll","align":"full","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull animate-on-scroll">
-  <!-- section content -->
-</div>
-<!-- /wp:group -->
-```
-
-### prefers-reduced-motion (Required)
-
-Every theme MUST include this in `style.css` (it ships there, auto-enqueued, even in
-build-pipeline repos):
-
-```css
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
 }
-```
 
-### How Much Animation
-
-Not every element needs animation. Prioritize:
-- **Hero section entrance** — the first impression (fade-up, scale, or slide)
-- **Section reveals on scroll** — major content blocks with `animate-on-scroll`
-- **Interactive elements** — cards with `hover-lift`, buttons with transitions
-- **1-2 decorative ambient animations** — a floating shape, gradient shift, or pulsing accent
-
-Avoid animating every heading, paragraph, and button individually — it creates visual noise rather than delight.
-
-## Card layouts in rows
-
-For equal-height, equal-width cards ( with optional bottom-aligned CTAs ), use this structure unless the user specifies otherwise:
-
-```
-Columns (className: "equal-cards")
-  └── Column
-        verticalAlignment: "stretch"
-        width: "X%" where X = 100 / number_of_cards (e.g., 2 cards = 50%, 3 cards = 33.33%, 4 cards = 25%)
-        └── Group [card wrapper]
-              └── [content: headings, paragraphs, images*, lists]
-              └── (optional) Buttons (className: "cta-bottom")
-```
-
-**Width rule**: All cards in a row MUST have equal width. Calculate each column's width as `100% / number_of_cards` (e.g., 3 cards = 33.33% each). The sum of all column widths must equal exactly 100% - never exceed the parent element width.
-
-*Images in cards: `style="height:200px;object-fit:cover;width:100%"`
-
-**Required CSS** (theme stylesheet):
-```css
-.equal-cards > .wp-block-column {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 0;
-}
-.equal-cards > .wp-block-column > .wp-block-group {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-```
-If present, ensure bottom-aligned CTAs unless otherwise specified:
-```css
-.equal-cards .cta-bottom {
-  margin-top: auto;
-  justify-content: center;
-}
-```
-Always add the following CSS (in `style.css`, alongside the reduced-motion block) to reset the footer top margin:
-```css
 .wp-site-blocks > footer {
   margin-block-start: 0;
 }
 ```
 
+## Where a Look Goes
+
+Put a look in the first place that can hold it:
+
+1. **theme.json**: the palette, scales, and what every heading, link and button looks like.
+2. **The block's own settings**, using the tokens (colors, spacing, one of the five
+   sizes, gap, per-viewport values).
+3. **A block style variation's styles**: a named look in `styles/{slug}.json`.
+4. **The variation's `css`**: pseudo-elements, transforms, transitions, hover states,
+   for its own block only.
+5. **The theme stylesheet**, last, only for what none of the above can hold:
+   `@keyframes`, `@media`, `::selection`, a focus ring. Scope each rule to a variation's
+   `is-style-*` class or an element, and say in the handoff what went there and why.
+
+A class you make up (`className: "fade-up"`) and style from a stylesheet is a hook the
+editor cannot show and nobody can apply. PB's validator flags it. If a look needs a
+name, it is a variation. Variation CSS: declarations first, then nested rules anchored
+on `&`; no comments, no at-rules, no `url()`, no `,` in a selector; 2000 characters.
+It styles one block, never the blocks placed inside it (use the variation's `blocks`
+entries for those).
+
+## Animation & Motion
+
+Motion is a block style variation like any other look. The variation carries the
+declarations in its JSON `css`; `@keyframes` (an at-rule a variation cannot hold) live
+in the theme's SCSS under the same name. The editor then lists the animation in the
+block's Styles panel, and anyone can apply it.
+
+`styles/fade-up.json`:
+
+```json
+{
+  "$schema": "https://schemas.wp.org/wp/7.1/theme.json",
+  "version": 3,
+  "slug": "fade-up",
+  "title": "Fade Up",
+  "blockTypes": [ "core/group", "core/heading", "core/columns", "core/image" ],
+  "styles": {
+    "css": "animation: fade-up 0.6s ease both;"
+  }
+}
+```
+
+`scss/styles/_fade-up.scss` (imported from `scss/theme.scss`):
+
+```scss
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+```
+
+Apply it in a pattern as `{"className":"is-style-fade-up"}`.
+
+**Hover transitions** need no stylesheet at all (`styles/hover-lift.json`):
+
+```json
+{
+  "slug": "hover-lift",
+  "title": "Hover Lift",
+  "blockTypes": [ "core/group", "core/column" ],
+  "styles": {
+    "css": "transition: transform 0.2s ease, box-shadow 0.2s ease; &:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15); }"
+  }
+}
+```
+
+**Ambient motion** (a floating shape, a pulsing accent) is the same split: the variation
+sets `animation: float 3s ease-in-out infinite;`, the SCSS holds the `@keyframes`.
+
+**Scroll-triggered reveals** need a variation, a little SCSS and a small script. Keep
+the content visible unless the script has run, so the editor and no-JS visitors never
+see hidden sections. Script, in the theme's `src/index.js` (it compiles to the already
+enqueued, deferred `build/index.js`; a standalone theme adds it through `functions.php`):
+
+```js
+const targets = document.querySelectorAll( '.is-style-reveal-on-scroll' );
+if ( targets.length && 'IntersectionObserver' in window ) {
+	document.documentElement.classList.add( 'has-reveal' );
+	const observer = new IntersectionObserver( ( entries ) => {
+		entries.forEach( ( entry ) => {
+			if ( entry.isIntersecting ) {
+				entry.target.classList.add( 'is-visible' );
+				observer.unobserve( entry.target );
+			}
+		} );
+	}, { threshold: 0.15 } );
+	targets.forEach( ( el ) => observer.observe( el ) );
+}
+```
+
+`styles/reveal-on-scroll.json` carries only `slug`, `title`, `blockTypes`. SCSS:
+
+```scss
+.has-reveal .is-style-reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+Respect `prefers-reduced-motion` (already in `style.css`). Not every element needs
+motion. Prioritize the hero entrance, scroll reveals on major sections, interactive
+cards and buttons, and one or two decorative ambient animations. Staggering children
+means reaching into blocks inside a variation, which a variation cannot do; give each
+child the same variation instead, or skip the stagger.
+
+## Card layouts in rows
+
+- A fixed number of cards across: `core/columns` with `align: wide`. A wrapping grid:
+  `core/group` with `{"layout":{"type":"grid","minimumColumnWidth":"16rem"}}`. Not a flex
+  group: flex children with no width size to their content.
+- The card is an **element pattern**. It is a part, not a band, so it never carries a
+  `constrained` layout at its root (give it the default layout) or it fills the whole track.
+- Grid and column children stretch to equal height. For a bottom-aligned CTA, make the
+  card a vertical flex group with `justifyContent: space-between` and the buttons as its
+  last child; check it in `render-pattern`'s page preview.
+- Card images use the image block's own settings: `aspectRatio`, `scale` (cover/contain),
+  `width`. No inline `object-fit` or pixel heights.
+
 ## Landing Page Composition
 
-When generating homepage block markup, think like a landing page designer, not a template assembler. Every section should be a visually distinct, full-width band that creates rhythm and visual impact as the user scrolls.
+Think like a landing page designer, not a template assembler. Each section is a visually
+distinct band that creates rhythm as the user scrolls. **You decide** which sections serve
+the site's type, audience and goal.
 
 ### Section Architecture
 
-- **Section margin reset**: Add `"style":{"spacing":{"margin":{"top":"0"}}}` to every top-level Group block that wraps a landing page section. This overrides WordPress's default top margin on direct children of `.wp-site-blocks` and can be easily adjusted by users in the editor.
-- **Section layout widths**: Hero sections, header groups, cover blocks, and feature grids should use `"align":"wide"` or `"align":"full"` rather than defaulting to narrow content width. Only use default (content) alignment for text-heavy reading sections.
-- Do **not** use `<inner-blocks>`; output the full expanded markup inside each block.
-- **Columns alignment**: ALWAYS set `"align":"wide"` on `wp:columns` blocks (and add the `alignwide` class on the wrapper div) unless specifically instructed otherwise.
-- **No decorative HTML comments**: Never insert section-labeling comments like `<!-- Hero Section -->` or `<!-- Services Section -->` in templates, template parts, or patterns. Only WordPress block comments (`<!-- wp:block-name -->`) are allowed.
-
-**Every major homepage section must be `alignfull`** — edge-to-edge across the viewport. Content inside can be constrained, but the section wrapper fills the screen width. This is the **full-bleed wrapper, constrained content** pattern:
-
-`<!-- wp:group {"align":"full","backgroundColor":"...","layout":{"type":"constrained"}} -->`
-
-**Never use bare `{"layout":{"type":"constrained"}}` without `"align":"full"` for homepage sections.** Without `alignfull`, sections render at `contentSize` (800px) and the page looks narrow and lifeless.
-
-**YOU DECIDE** which sections best serve this specific site. Do not follow a rigid template. Consider the site type, audience, and primary goal:
-
-- A portfolio needs a full-bleed project gallery
-- A SaaS needs feature grids with clear value props
-- A restaurant needs appetizing imagery and menu sections
-- An agency needs case study cards and social proof
-- An escape room needs atmosphere and immersion
+- A section is a group with `layout.type: constrained` that is **Wide or Regular**,
+  padded **top and bottom only**. Its content is Wide or Regular too. Never pad the
+  sides to place content: the space to the window's edge is the theme's root padding.
+- Make a section `align: full` **only when its background must reach the window's
+  edges** (a painted band, a cover). Its content is still Wide or Regular, with no side
+  padding. A text-only band with no background is not full width.
+- Use `align: wide` for hero content, feature grids and columns. Use Regular for
+  text-heavy reading sections.
+- Space comes from a group's `blockGap` and the band's top/bottom padding, not from
+  spacer blocks between sections. The template's zero-gap wrapper handles the
+  header/content/footer joins; no per-section margin resets are needed.
+- Use the full block markup for each block; do not rely on `<inner-blocks>` shorthand.
 
 ### Visual Rhythm
 
-Alternate between visual treatments to create rhythm as the user scrolls:
+Alternate treatments so adjacent sections never look alike:
 
 | Technique | WordPress Implementation |
 |-----------|------------------------|
-| Alternating backgrounds | Alternate `backgroundColor` between `background` and `surface` (or `primary`/`secondary` for bold sections) |
-| Full-bleed imagery | Cover blocks with `"align":"full"` and `overlayColor` from the brand palette |
-| Edge-to-edge media-text | `wp:media-text` with `"align":"full"` for alternating image/content sides |
-| Bold CTA bands | Full-width group with `primary` or `accent` background, centered text |
-| Spacer breaks | `wp:spacer` between sections for breathing room |
+| Alternating backgrounds | Alternate `backgroundColor` between `base` and `surface` (or `primary` / `surface-inverse` for bold sections) |
+| Full-bleed imagery | `core/cover` with `"align":"full"` and an overlay from the palette |
+| Image beside copy | `core/media-text`, not hand-built columns (it handles stacking and ratios) |
+| Bold CTA bands | Full-width group with a `primary` or `accent` background, centered text, text color `on-primary` / `on-accent` |
+| Breathing room | A larger top/bottom padding step on the band |
 
-Every section should feel visually distinct from its neighbors. If two adjacent sections have the same background color and layout pattern, the page feels monotonous — change the background, flip the image side, switch from grid to single-column, or add a cover block break.
+If two adjacent sections share a background and layout, change the background, flip the
+image side, or switch from grid to a single column.
 
 ## Image Handling
 
-ONLY add user provided images/image URLs to the initial site build. Stock image urls often fail to load in the block editor and break the design.
-Look at any user supplies images carefully and include them in the design if appropriate, but do not force them in if they do not fit the design. 
+Only use images the user supplied. Stock image URLs often fail in the editor. For
+everything else use PB: `find-media` lists what exists (use the `reference` it returns
+verbatim), `add-asset` uploads a file or URL, and `add-placeholder-image` makes a
+placeholder. Never a remote placeholder service. Hand back the list of images the
+person still needs to supply.
 
-### Creating Visual Richness Without Images
+### Visual Richness Without Images
 
-Since only user provided images/image URLs can be used, if none are available convey atmosphere and visual interest through:
+Convey atmosphere through the theme's own tools:
 
-- **CSS Gradients**: Linear, radial, and conic gradients for depth and color
-- **Color Blocks**: Bold use of background colors to create visual hierarchy
-- **Typography as Design**: Large, distinctive headings; creative font pairing; varied text sizes and weights
-- **CSS Patterns**: Repeating backgrounds using CSS gradients (stripes, dots, grids)
-- **Shadows & Depth**: Box-shadow, text-shadow, and drop-shadow for dimension
-- **Borders & Frames**: Creative use of borders, outlines, and decorative frames
-- **Spacing & Layout**: Generous whitespace or controlled density to create mood
-- **CSS Pseudo-elements**: ::before and ::after for decorative visual elements
-- **Color Overlays**: Layered divs with transparency for atmospheric effects
+- **Color blocks and typography**: bold use of palette roles, large distinctive headings,
+  varied weights and sizes (from the five sizes).
+- **Gradients and shadows**: gradient backgrounds and shadows from block settings or a
+  variation.
+- **Borders and frames**: borders from block settings, a hairline color token.
+- **Decorative details**: pseudo-elements (`::before`, `::after`) belong in a block style
+  variation's `css`, scoped to its own block.
+- **Whitespace**: generous space or controlled density, set with the spacing scale.

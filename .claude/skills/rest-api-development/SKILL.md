@@ -19,7 +19,7 @@ Expert guidance for creating custom REST API endpoints, extending existing endpo
 ## Verifying against the local environment
 This repo runs WordPress through wp-env. To inspect routes and test responses:
 ```
-npm start                                            # boot the environment
+npm run server:start                                         # boot the environment
 curl http://localhost:8888/wp-json/                  # API root — lists every route
 npx wp-env run cli wp rest                           # WP-CLI REST commands
 ```

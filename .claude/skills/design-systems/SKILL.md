@@ -7,6 +7,13 @@ description: Bold aesthetic direction guidance for web design. Use when making c
 
 Frameworks for creating distinctive, memorable web designs that avoid generic "AI slop" aesthetics.
 
+**Scope:** this is for choosing a design direction when the design is yours to set. When the
+job is to reproduce an existing design (a site, Figma file, screenshot), the source's values
+win: use the `design-reproduction` skill and ignore the "be bold, never converge" guidance
+below. In a block theme, tokens, markup and CSS placement follow Pattern Builder's
+`pattern-author` guide: color slugs are roles (not hues), there are five font sizes, and
+spacing slugs are numeric.
+
 ## Absolute Rules
 
 - **NO EMOJIS**: Never use emojis anywhere in generated content - not in headings, paragraphs, button text, or any other text.
@@ -100,80 +107,11 @@ Motion is a design system element like color and typography — it should be int
 | Background animation | Gradient color cycling, pattern movement, ambient drift |
 | Text effects | Letter-spacing transitions, weight shifts, color wipes on headings |
 
-**CSS animation patterns:**
-```css
-/* Staggered fade-up entrance */
-.fade-up {
-  opacity: 0;
-  transform: translateY(30px);
-  animation: fadeUp 0.6s ease forwards;
-}
-.fade-up:nth-child(1) { animation-delay: 0.1s; }
-.fade-up:nth-child(2) { animation-delay: 0.2s; }
-.fade-up:nth-child(3) { animation-delay: 0.3s; }
-.fade-up:nth-child(4) { animation-delay: 0.4s; }
-
-@keyframes fadeUp {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Slide-in from side */
-.slide-in-left {
-  opacity: 0;
-  transform: translateX(-40px);
-  animation: slideInLeft 0.7s ease forwards;
-}
-@keyframes slideInLeft {
-  to { opacity: 1; transform: translateX(0); }
-}
-
-/* Scale reveal */
-.scale-up {
-  opacity: 0;
-  transform: scale(0.9);
-  animation: scaleUp 0.5s ease forwards;
-}
-@keyframes scaleUp {
-  to { opacity: 1; transform: scale(1); }
-}
-
-/* Continuous float — decorative elements */
-.float {
-  animation: float 3s ease-in-out infinite;
-}
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-/* Gradient background animation */
-.gradient-shift {
-  background-size: 200% 200%;
-  animation: gradientShift 8s ease infinite;
-}
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Hover transitions */
-.hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-}
-
-/* Accessibility: always include */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
+**Implementation in a WordPress block theme:** each motion is a registered block style
+variation (`styles/{slug}.json`, applied as `is-style-{slug}`), with its declarations in the
+variation's `css` and any `@keyframes` in the theme's SCSS. Do not invent `className` hooks
+styled from a stylesheet. The `block-themes` skill has the pattern and a scroll-reveal
+example, and `prefers-reduced-motion` is already handled in the theme's `style.css`.
 
 **Orchestration guidance:**
 - **Pick 2-3 motion techniques per site** and use them consistently, subtly — don't scatter every technique across a single page

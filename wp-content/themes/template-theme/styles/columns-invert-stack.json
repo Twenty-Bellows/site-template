@@ -3,8 +3,5 @@
 	"version": 3,
 	"title": "Invert Stack",
 	"slug": "invert-stack",
-	"blockTypes": [ "core/columns" ],
-	"styles": {
-		"css": "/* see scss/styles/_columns-invert-stack.scss */"
-	}
+	"blockTypes": [ "core/columns" ]
 }

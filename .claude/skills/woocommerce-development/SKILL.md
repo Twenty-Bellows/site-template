@@ -19,7 +19,7 @@ Expert guidance for customizing WooCommerce stores, including products, checkout
 ## Verifying against the local environment
 This repo runs WordPress through wp-env. To inspect or test store behavior:
 ```
-npm start                                      # boot the environment
+npm run server:start                                   # boot the environment
 npx wp-env run cli wp plugin list              # confirm WooCommerce is active
 npx wp-env run cli wp wc product list --user=admin   # WC CLI commands
 npx wp-env run cli wp shell                    # interactive PHP against the install

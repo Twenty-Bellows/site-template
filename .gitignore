@@ -11,3 +11,5 @@ node_modules/
 .wp-env.override.json
 /**/*.map
 deliverables/
+/.claude/skills/design-reproduction
+/.claude/skills/pattern-author
