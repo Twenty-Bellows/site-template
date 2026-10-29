@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "init-project": "node init-project.js",
-    "server:start": "wp-env start --xdebug",
+    "server:start": "wp-env start",
     "server:stop": "wp-env stop",
     "wp-env": "wp-env",
     "create-block": "mkdir -p wp-content/plugins/template-plugin/src/blocks && cd wp-content/plugins/template-plugin/src/blocks && npx @wordpress/create-block@latest --namespace=template-plugin --no-wp-scripts --no-plugin",
