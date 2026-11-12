@@ -1,0 +1,65 @@
+{
+	"$schema": "https://schemas.wp.org/wp/7.1/theme.json",
+	"version": 3,
+	"title": "Earthy",
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFamily": "Fraunces, Georgia, serif",
+					"name": "Heading (Fraunces)",
+					"slug": "heading",
+					"fontFace": [
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Fraunces",
+							"fontStyle": "normal",
+							"fontWeight": "100 900",
+							"src": [
+								"file:./assets/fonts/fraunces/Fraunces-Variable.woff2"
+							]
+						}
+					]
+				},
+				{
+					"fontFamily": "'Source Sans 3', sans-serif",
+					"name": "Body (Source Sans 3)",
+					"slug": "body",
+					"fontFace": [
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Source Sans 3",
+							"fontStyle": "normal",
+							"fontWeight": "200 900",
+							"src": [
+								"file:./assets/fonts/source-sans-3/SourceSans3-Variable.woff2"
+							]
+						},
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Source Sans 3",
+							"fontStyle": "italic",
+							"fontWeight": "200 900",
+							"src": [
+								"file:./assets/fonts/source-sans-3/SourceSans3-Italic-Variable.woff2"
+							]
+						}
+					]
+				}
+			]
+		}
+	},
+	"styles": {
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--body)"
+		},
+		"elements": {
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--heading)",
+					"fontWeight": "600"
+				}
+			}
+		}
+	}
+}

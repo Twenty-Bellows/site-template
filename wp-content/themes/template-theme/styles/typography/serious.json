@@ -1,0 +1,65 @@
+{
+	"$schema": "https://schemas.wp.org/wp/7.1/theme.json",
+	"version": 3,
+	"title": "Serious",
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFamily": "Newsreader, Georgia, serif",
+					"name": "Heading (Newsreader)",
+					"slug": "heading",
+					"fontFace": [
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Newsreader",
+							"fontStyle": "normal",
+							"fontWeight": "200 800",
+							"src": [
+								"file:./assets/fonts/newsreader/Newsreader-Variable.woff2"
+							]
+						}
+					]
+				},
+				{
+					"fontFamily": "'Libre Franklin', sans-serif",
+					"name": "Body (Libre Franklin)",
+					"slug": "body",
+					"fontFace": [
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Libre Franklin",
+							"fontStyle": "normal",
+							"fontWeight": "100 900",
+							"src": [
+								"file:./assets/fonts/libre-franklin/LibreFranklin-Variable.woff2"
+							]
+						},
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Libre Franklin",
+							"fontStyle": "italic",
+							"fontWeight": "100 900",
+							"src": [
+								"file:./assets/fonts/libre-franklin/LibreFranklin-Italic-Variable.woff2"
+							]
+						}
+					]
+				}
+			]
+		}
+	},
+	"styles": {
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--body)"
+		},
+		"elements": {
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--heading)",
+					"fontWeight": "600"
+				}
+			}
+		}
+	}
+}

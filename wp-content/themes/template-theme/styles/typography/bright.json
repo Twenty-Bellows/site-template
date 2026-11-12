@@ -1,0 +1,65 @@
+{
+	"$schema": "https://schemas.wp.org/wp/7.1/theme.json",
+	"version": 3,
+	"title": "Bright",
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFamily": "'Bricolage Grotesque', sans-serif",
+					"name": "Heading (Bricolage Grotesque)",
+					"slug": "heading",
+					"fontFace": [
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Bricolage Grotesque",
+							"fontStyle": "normal",
+							"fontWeight": "200 800",
+							"src": [
+								"file:./assets/fonts/bricolage-grotesque/BricolageGrotesque-Variable.woff2"
+							]
+						}
+					]
+				},
+				{
+					"fontFamily": "Figtree, sans-serif",
+					"name": "Body (Figtree)",
+					"slug": "body",
+					"fontFace": [
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Figtree",
+							"fontStyle": "normal",
+							"fontWeight": "300 900",
+							"src": [
+								"file:./assets/fonts/figtree/Figtree-Variable.woff2"
+							]
+						},
+						{
+							"fontDisplay": "swap",
+							"fontFamily": "Figtree",
+							"fontStyle": "italic",
+							"fontWeight": "300 900",
+							"src": [
+								"file:./assets/fonts/figtree/Figtree-Italic-Variable.woff2"
+							]
+						}
+					]
+				}
+			]
+		}
+	},
+	"styles": {
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--body)"
+		},
+		"elements": {
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--heading)",
+					"fontWeight": "700"
+				}
+			}
+		}
+	}
+}

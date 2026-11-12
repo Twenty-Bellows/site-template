@@ -75,7 +75,7 @@
 						<h5 class="wp-block-heading">Base</h5>
 						<!-- /wp:heading -->
 						<!-- wp:paragraph {"fontSize":"x-small"} -->
-						<p class="has-x-small-font-size">#ffffff</p>
+						<p class="has-x-small-font-size">base</p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:group -->
@@ -89,7 +89,7 @@
 						<h5 class="wp-block-heading">Surface</h5>
 						<!-- /wp:heading -->
 						<!-- wp:paragraph {"fontSize":"x-small"} -->
-						<p class="has-x-small-font-size">#f5f5f5</p>
+						<p class="has-x-small-font-size">surface</p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:group -->
@@ -103,7 +103,7 @@
 						<h5 class="wp-block-heading">Surface Muted</h5>
 						<!-- /wp:heading -->
 						<!-- wp:paragraph {"fontSize":"x-small"} -->
-						<p class="has-x-small-font-size">#e8e8e8</p>
+						<p class="has-x-small-font-size">surface-muted</p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:group -->
@@ -121,7 +121,7 @@
 						<h5 class="wp-block-heading has-base-color has-text-color">Primary</h5>
 						<!-- /wp:heading -->
 						<!-- wp:paragraph {"textColor":"base","fontSize":"x-small"} -->
-						<p class="has-base-color has-text-color has-x-small-font-size">#333333</p>
+						<p class="has-base-color has-text-color has-x-small-font-size">primary</p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:group -->
@@ -135,7 +135,7 @@
 						<h5 class="wp-block-heading has-base-color has-text-color">Primary Hover</h5>
 						<!-- /wp:heading -->
 						<!-- wp:paragraph {"textColor":"base","fontSize":"x-small"} -->
-						<p class="has-base-color has-text-color has-x-small-font-size">#000000</p>
+						<p class="has-base-color has-text-color has-x-small-font-size">primary-hover</p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:group -->
@@ -149,7 +149,7 @@
 						<h5 class="wp-block-heading has-base-color has-text-color">Accent</h5>
 						<!-- /wp:heading -->
 						<!-- wp:paragraph {"textColor":"base","fontSize":"x-small"} -->
-						<p class="has-base-color has-text-color has-x-small-font-size">#4a4a4a</p>
+						<p class="has-base-color has-text-color has-x-small-font-size">accent</p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:group -->
@@ -163,11 +163,11 @@
 				<div class="wp-block-column">
 					<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|30","right":"var:preset|spacing|30"}}},"backgroundColor":"base","layout":{"type":"constrained"}} -->
 					<div class="wp-block-group has-base-background-color has-background" style="padding-top:var(--wp--preset--spacing--30);padding-right:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30)">
-						<!-- wp:heading {"level":5,"textColor":"text"} -->
-						<h5 class="wp-block-heading has-text-color">Text</h5>
+						<!-- wp:heading {"level":5,"textColor":"contrast"} -->
+						<h5 class="wp-block-heading has-contrast-color has-text-color">Contrast</h5>
 						<!-- /wp:heading -->
-						<!-- wp:paragraph {"textColor":"text","fontSize":"x-small"} -->
-						<p class="has-text-color has-x-small-font-size">#1a1a1a</p>
+						<!-- wp:paragraph {"textColor":"contrast","fontSize":"x-small"} -->
+						<p class="has-contrast-color has-text-color has-x-small-font-size">contrast</p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:group -->
@@ -181,7 +181,7 @@
 						<h5 class="wp-block-heading has-text-muted-color has-text-color">Text Muted</h5>
 						<!-- /wp:heading -->
 						<!-- wp:paragraph {"textColor":"text-muted","fontSize":"x-small"} -->
-						<p class="has-text-muted-color has-text-color has-x-small-font-size">#666666</p>
+						<p class="has-text-muted-color has-text-color has-x-small-font-size">text-muted</p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:group -->
@@ -192,10 +192,10 @@
 					<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|30","right":"var:preset|spacing|30"}},"border":{"color":"var:preset|color|hairline","width":"1px"}},"backgroundColor":"base","layout":{"type":"constrained"}} -->
 					<div class="wp-block-group has-border-color has-base-background-color has-background" style="border-color:var(--wp--preset--color--hairline);border-width:1px;padding-top:var(--wp--preset--spacing--30);padding-right:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30)">
 						<!-- wp:heading {"level":5} -->
-						<h5 class="wp-block-heading">Border</h5>
+						<h5 class="wp-block-heading">Hairline</h5>
 						<!-- /wp:heading -->
 						<!-- wp:paragraph {"fontSize":"x-small"} -->
-						<p class="has-x-small-font-size">#d4d4d4</p>
+						<p class="has-x-small-font-size">hairline</p>
 						<!-- /wp:paragraph -->
 					</div>
 					<!-- /wp:group -->
