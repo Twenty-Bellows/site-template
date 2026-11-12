@@ -25,47 +25,47 @@
 			],
 			"palette": [
 				{
-					"color": "#ffffff",
+					"color": "#fbfbfa",
 					"name": "Base",
 					"slug": "base"
 				},
 				{
-					"color": "#f4f6f8",
+					"color": "#f1f2f4",
 					"name": "Surface",
 					"slug": "surface"
 				},
 				{
-					"color": "#e6eaee",
+					"color": "#e2e5ea",
 					"name": "Surface Muted",
 					"slug": "surface-muted"
 				},
 				{
-					"color": "#14181d",
+					"color": "#0f1b2d",
 					"name": "Contrast",
 					"slug": "contrast"
 				},
 				{
-					"color": "#566170",
+					"color": "#4a5568",
 					"name": "Text Muted",
 					"slug": "text-muted"
 				},
 				{
-					"color": "#1f4fd8",
+					"color": "#1b2a49",
 					"name": "Primary",
 					"slug": "primary"
 				},
 				{
-					"color": "#173ba3",
+					"color": "#0d1626",
 					"name": "Primary Hover",
 					"slug": "primary-hover"
 				},
 				{
-					"color": "#0f7f81",
+					"color": "#8a1c2b",
 					"name": "Accent",
 					"slug": "accent"
 				},
 				{
-					"color": "#d5dbe2",
+					"color": "#cfd4dc",
 					"name": "Hairline",
 					"slug": "hairline"
 				}
@@ -163,9 +163,6 @@
 					"slug": "heading"
 				},
 				{
-					"fontFamily": "Inter, sans-serif",
-					"name": "Body (Inter)",
-					"slug": "body",
 					"fontFace": [
 						{
 							"fontDisplay": "swap",
@@ -185,7 +182,10 @@
 								"file:./assets/fonts/inter/Inter-Italic-Variable.woff2"
 							]
 						}
-					]
+					],
+					"fontFamily": "Inter, sans-serif",
+					"name": "Body (Inter)",
+					"slug": "body"
 				}
 			],
 			"fontSizes": [
@@ -309,9 +309,9 @@
 			},
 			"heading": {
 				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--heading)",
 					"fontWeight": "600",
-					"lineHeight": "1.2",
-					"fontFamily": "var(--wp--preset--font-family--heading)"
+					"lineHeight": "1.2"
 				}
 			},
 			"link": {
